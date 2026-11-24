@@ -100,11 +100,11 @@
       <!-- Unified Navigation & Actions Bar -->
       <div class="bg-white p-3 rounded-2xl shadow-xs border border-slate-200/90 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         
-        <!-- Main Navigation Tabs -->
+        <!-- Main Navigation Tabs (4 Core Calling & Directory Options + Staff Activity) -->
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="setManagerTab('directory')" id="mTabBtn-directory" class="m-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-emerald-600 text-white shadow-xs">
-            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-200"></i>
-            <span>Admitted Students</span>
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>All Students</span>
             <span id="mBadgeAdmitted" class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-extrabold">1,923</span>
           </button>
 
@@ -114,8 +114,20 @@
             <span id="mBadgeEnquiries" class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-extrabold border border-rose-200">0</span>
           </button>
 
+          <button onclick="setManagerTab('fees')" id="mTabBtn-fees" class="m-tab px-4 py-2.5 rounded-xl text-xs font-bold transition text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2">
+            <i data-lucide="wallet" class="w-4 h-4 text-amber-500"></i>
+            <span>Fees Pending Students</span>
+            <span id="mBadgeFees" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-extrabold border border-amber-200">0</span>
+          </button>
+
+          <button onclick="setManagerTab('exams')" id="mTabBtn-exams" class="m-tab px-4 py-2.5 rounded-xl text-xs font-bold transition text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2">
+            <i data-lucide="award" class="w-4 h-4 text-indigo-500"></i>
+            <span>Call for Exam Students</span>
+            <span id="mBadgeExams" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">Nov (3)</span>
+          </button>
+
           <button onclick="setManagerTab('staff')" id="mTabBtn-staff" class="m-tab px-4 py-2.5 rounded-xl text-xs font-bold transition text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-500"></i>
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-slate-500"></i>
             <span>Staff Activity</span>
           </button>
         </div>
@@ -333,6 +345,217 @@
         </div>
       </div>
 
+            <!-- PANEL: FEES PENDING STUDENTS (MANAGER) -->
+      <div id="mFeesPanel" class="hidden space-y-4">
+        <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-xs border border-slate-200/90 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="p-2.5 rounded-2xl bg-amber-50 text-amber-600">
+                <i data-lucide="wallet" class="w-6 h-6"></i>
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Pending Calling List</h3>
+                  <span id="mFeesCountBadge" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black border border-amber-200">0 Students</span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">Students with pending fees. Staff will call these students for fee recovery.</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="openMarkFeePendingModal()" class="flex items-center gap-1.5 px-3.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>+ Mark Student Fee Pending</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="setFeeFilter('all')" id="mFeeFilterBtn-all" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs">
+                All Pending
+              </button>
+              <button onclick="setFeeFilter('overdue')" id="mFeeFilterBtn-overdue" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+                <span>Overdue</span>
+                <span id="mBadgeFeeOverdue" class="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
+              </button>
+              <button onclick="setFeeFilter('today')" id="mFeeFilterBtn-today" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Due Today
+              </button>
+              <button onclick="setFeeFilter('upcoming')" id="mFeeFilterBtn-upcoming" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Upcoming
+              </button>
+              <button onclick="setFeeFilter('paid')" id="mFeeFilterBtn-paid" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                Paid History
+              </button>
+            </div>
+            <div class="relative w-full sm:w-72">
+              <input type="text" id="mFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            </div>
+          </div>
+
+          <!-- Fees Table -->
+          <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                  <th class="py-3 px-4">Student & Father</th>
+                  <th class="py-3 px-3">Contact</th>
+                  <th class="py-3 px-3">Course / Batch</th>
+                  <th class="py-3 px-3">Pending Amount</th>
+                  <th class="py-3 px-3">Due Date</th>
+                  <th class="py-3 px-4">Latest Calling Remark</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="mFeesTableBody" class="divide-y divide-slate-100 text-slate-700">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+          <div id="mFeesEmptyState" class="hidden text-center py-12">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="wallet" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-700">No students found with pending fees</h4>
+            <p class="text-xs text-slate-400 mt-1">Click "+ Mark Student Fee Pending" to add students to this calling list.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: CALL FOR EXAM (MANAGER / ADMIN MONTHLY SYSTEM) -->
+      <div id="mExamsPanel" class="hidden space-y-4">
+        <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-xs border border-slate-200/90 space-y-4">
+          
+          <!-- Header Bar with Month Selector and Staff Visibility Switch -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Call for Exam (Monthly Calling System)</h3>
+                  <span id="mExamActiveMonthBadge" class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">November 2026</span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">Exam lists arrive around 23rd of each month. Admin controls staff visibility.</p>
+              </div>
+            </div>
+
+            <!-- Admin Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Month Selector Dropdown (Admin sees all months including archives) -->
+              <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+                <span class="text-[11px] font-bold text-slate-500">Month:</span>
+                <select id="mExamMonthSelector" onchange="changeExamMonth(this.value)" class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <!-- Master Staff Visibility Toggle -->
+              <button id="mExamVisibilityToggleBtn" onclick="toggleExamVisibility()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition shadow-xs bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span id="mExamVisibilityToggleText">Staff: Visible (ON)</span>
+              </button>
+
+              <button onclick="openAddExamStudentModal()" class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>+ Add Student</span>
+              </button>
+
+              <button onclick="openImportExamModal()" class="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs transition">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                <span>Import Excel/CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Exam Content -->
+          <div class="space-y-4">
+            
+            <!-- Summary Stats Counters -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              <div class="bg-slate-50 px-3 py-2.5 rounded-2xl border border-slate-200 text-center">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total in Month</div>
+                <div class="text-xl font-black text-slate-800 mt-0.5" id="mExamStatTotal">0</div>
+              </div>
+              <div class="bg-emerald-50 px-3 py-2.5 rounded-2xl border border-emerald-100 text-center">
+                <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Confirmed (Coming)</div>
+                <div class="text-xl font-black text-emerald-700 mt-0.5" id="mExamStatConfirmed">0</div>
+              </div>
+              <div class="bg-slate-100 px-3 py-2.5 rounded-2xl border border-slate-200 text-center">
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Not Called</div>
+                <div class="text-xl font-black text-slate-700 mt-0.5" id="mExamStatNotCalled">0</div>
+              </div>
+              <div class="bg-rose-50 px-3 py-2.5 rounded-2xl border border-rose-100 text-center">
+                <div class="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Absent / Not Giving</div>
+                <div class="text-xl font-black text-rose-700 mt-0.5" id="mExamStatAbsent">0</div>
+              </div>
+              <div class="bg-amber-50 px-3 py-2.5 rounded-2xl border border-amber-100 text-center">
+                <div class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Call Back / Issue</div>
+                <div class="text-xl font-black text-amber-700 mt-0.5" id="mExamStatCallback">0</div>
+              </div>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap gap-1.5">
+                <button onclick="setExamFilter('all')" id="mExamFilterBtn-all" class="m-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-xs">
+                  All
+                </button>
+                <button onclick="setExamFilter('NOT_CALLED')" id="mExamFilterBtn-NOT_CALLED" class="m-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                  Not Called
+                </button>
+                <button onclick="setExamFilter('CONFIRMED')" id="mExamFilterBtn-CONFIRMED" class="m-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                  Confirmed
+                </button>
+                <button onclick="setExamFilter('ABSENT')" id="mExamFilterBtn-ABSENT" class="m-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition">
+                  Absent
+                </button>
+                <button onclick="setExamFilter('CALL_BACK')" id="mExamFilterBtn-CALL_BACK" class="m-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition">
+                  Call Back
+                </button>
+                <button onclick="setExamFilter('FEE_ISSUE')" id="mExamFilterBtn-FEE_ISSUE" class="m-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 transition">
+                  Fee Issue
+                </button>
+              </div>
+              <div class="relative w-full sm:w-72">
+                <input type="text" id="mExamSearchInput" oninput="debounceExamSearch()" placeholder="Search name, phone, course, roll no..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              </div>
+            </div>
+
+            <!-- Exam Students Table -->
+            <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th class="py-3 px-4">Student & Father</th>
+                    <th class="py-3 px-3">Contact</th>
+                    <th class="py-3 px-3">Course / Roll No</th>
+                    <th class="py-3 px-3">Exam Date</th>
+                    <th class="py-3 px-3">Call Status</th>
+                    <th class="py-3 px-4">Latest Remarks</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="mExamTableBody" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Dynamically loaded -->
+                </tbody>
+              </table>
+            </div>
+            <div id="mExamEmptyState" class="hidden text-center py-12">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </div>
+              <h4 class="text-sm font-bold text-slate-700">No exam students found for this month</h4>
+              <p class="text-xs text-slate-400 mt-1">Click "+ Add Student" or "Import Excel/CSV" to add students to this month's exam list.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- PANEL 3: STAFF PERFORMANCE -->
       <div id="mStaffPanel" class="hidden space-y-4">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -376,12 +599,12 @@
     <!-- 2. CALLING STAFF SECTION -->
     <div id="staffSection" class="hidden space-y-4">
 
-      <!-- Staff Top Navigation Bar -->
+      <!-- Staff Top Navigation Bar (4 Core Calling & Directory Options) -->
       <div class="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="setStaffMode('admitted')" id="sModeBtn-admitted" class="s-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-emerald-600 text-white shadow-xs">
-            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-200"></i>
-            <span>Admitted Students</span>
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>All Students</span>
             <span id="sBadgeAdmittedShared" class="px-2 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-extrabold">1,923</span>
           </button>
 
@@ -389,6 +612,18 @@
             <i data-lucide="phone-incoming" class="w-4 h-4 text-rose-500"></i>
             <span>Enquiries</span>
             <span id="sBadgeMyEnquiriesTab" class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-extrabold border border-rose-200">0</span>
+          </button>
+
+          <button onclick="setStaffMode('fees')" id="sModeBtn-fees" class="s-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="wallet" class="w-4 h-4 text-amber-500"></i>
+            <span>Fees Pending Students</span>
+            <span id="sBadgeFeesStaff" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-extrabold border border-amber-200">0</span>
+          </button>
+
+          <button onclick="setStaffMode('exams')" id="sModeBtn-exams" class="s-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="award" class="w-4 h-4 text-indigo-500"></i>
+            <span>Call for Exam Students</span>
+            <span id="sBadgeExamsStaff" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">Nov (3)</span>
           </button>
         </div>
 
@@ -510,6 +745,193 @@
               <i data-lucide="phone-incoming" class="w-7 h-7"></i>
             </div>
             <h4 class="text-sm font-bold text-slate-700">No enquiries found</h4>
+          </div>
+        </div>
+      </div>
+
+    
+      <!-- PANEL 3: FEES PENDING STUDENTS (STAFF) -->
+      <div id="sFeesPanel" class="hidden space-y-4">
+        <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-xs border border-slate-200/90 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="p-2.5 rounded-2xl bg-amber-50 text-amber-600">
+                <i data-lucide="wallet" class="w-6 h-6"></i>
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Pending Calling List</h3>
+                  <span id="sFeesCountBadge" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black border border-amber-200">0 Students</span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">Call these students for pending fee payments and record calling remarks.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="setFeeFilter('all')" id="sFeeFilterBtn-all" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs">
+                All Pending
+              </button>
+              <button onclick="setFeeFilter('overdue')" id="sFeeFilterBtn-overdue" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+                <span>Overdue</span>
+                <span id="sBadgeFeeOverdue" class="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
+              </button>
+              <button onclick="setFeeFilter('today')" id="sFeeFilterBtn-today" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Due Today
+              </button>
+              <button onclick="setFeeFilter('upcoming')" id="sFeeFilterBtn-upcoming" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                Upcoming
+              </button>
+            </div>
+            <div class="relative w-full sm:w-72">
+              <input type="text" id="sFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            </div>
+          </div>
+
+          <!-- Fees Table (Staff View) -->
+          <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                  <th class="py-3 px-4">Student & Father</th>
+                  <th class="py-3 px-3">Contact</th>
+                  <th class="py-3 px-3">Course / Batch</th>
+                  <th class="py-3 px-3">Pending Amount</th>
+                  <th class="py-3 px-3">Due Date</th>
+                  <th class="py-3 px-4">Latest Calling Remark</th>
+                  <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="sFeesTableBody" class="divide-y divide-slate-100 text-slate-700">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+          <div id="sFeesEmptyState" class="hidden text-center py-12">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="wallet" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-700">No students currently have pending fees</h4>
+            <p class="text-xs text-slate-400 mt-1">Admin will assign students here when fees are due.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 4: CALL FOR EXAM (STAFF MONTHLY SYSTEM) -->
+      <div id="sExamsPanel" class="hidden space-y-4">
+        <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-xs border border-slate-200/90 space-y-4">
+          
+          <!-- Staff Header Bar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Call for Exam Students</h3>
+                  <span id="sExamActiveMonthBadge" class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">November 2026</span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">Call students for upcoming exams and confirm attendance / roll numbers.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Staff Locked / Hidden Notice -->
+          <div id="sExamStaffHiddenNotice" class="hidden bg-amber-50/80 border border-amber-200 rounded-2xl p-8 text-center space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+              <i data-lucide="lock" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-black text-amber-900">Exam Calling List is Not Active Yet</h4>
+            <p class="text-xs text-amber-700 max-w-md mx-auto">
+              Exam list updates around the 23rd of every month. Admin will enable calling access once the list is published.
+            </p>
+          </div>
+
+          <!-- Staff Main Exam Content (Visible when admin toggles on) -->
+          <div id="sExamMainContent" class="space-y-4">
+            
+            <!-- Summary Stats Counters -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              <div class="bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 text-center">
+                <div class="text-[10px] font-bold text-slate-400 uppercase">Total to Call</div>
+                <div class="text-lg font-black text-slate-800 mt-0.5" id="sExamStatTotal">0</div>
+              </div>
+              <div class="bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100 text-center">
+                <div class="text-[10px] font-bold text-emerald-600 uppercase">Confirmed</div>
+                <div class="text-lg font-black text-emerald-700 mt-0.5" id="sExamStatConfirmed">0</div>
+              </div>
+              <div class="bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 text-center">
+                <div class="text-[10px] font-bold text-slate-500 uppercase">Not Called</div>
+                <div class="text-lg font-black text-slate-700 mt-0.5" id="sExamStatNotCalled">0</div>
+              </div>
+              <div class="bg-rose-50 px-3 py-2 rounded-xl border border-rose-100 text-center">
+                <div class="text-[10px] font-bold text-rose-600 uppercase">Absent</div>
+                <div class="text-lg font-black text-rose-700 mt-0.5" id="sExamStatAbsent">0</div>
+              </div>
+              <div class="bg-amber-50 px-3 py-2 rounded-xl border border-amber-100 text-center">
+                <div class="text-[10px] font-bold text-amber-600 uppercase">Call Back / Issue</div>
+                <div class="text-lg font-black text-amber-700 mt-0.5" id="sExamStatCallback">0</div>
+              </div>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap gap-1.5">
+                <button onclick="setExamFilter('all')" id="sExamFilterBtn-all" class="s-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-xs">
+                  All
+                </button>
+                <button onclick="setExamFilter('NOT_CALLED')" id="sExamFilterBtn-NOT_CALLED" class="s-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                  Not Called
+                </button>
+                <button onclick="setExamFilter('CONFIRMED')" id="sExamFilterBtn-CONFIRMED" class="s-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                  Confirmed
+                </button>
+                <button onclick="setExamFilter('ABSENT')" id="sExamFilterBtn-ABSENT" class="s-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition">
+                  Absent
+                </button>
+                <button onclick="setExamFilter('CALL_BACK')" id="sExamFilterBtn-CALL_BACK" class="s-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition">
+                  Call Back
+                </button>
+                <button onclick="setExamFilter('FEE_ISSUE')" id="sExamFilterBtn-FEE_ISSUE" class="s-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 transition">
+                  Fee Issue
+                </button>
+              </div>
+              <div class="relative w-full sm:w-72">
+                <input type="text" id="sExamSearchInput" oninput="debounceExamSearch()" placeholder="Search name, phone, course, roll no..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              </div>
+            </div>
+
+            <!-- Exam Students Table (Staff View) -->
+            <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th class="py-3 px-4">Student & Father</th>
+                    <th class="py-3 px-3">Contact</th>
+                    <th class="py-3 px-3">Course / Roll No</th>
+                    <th class="py-3 px-3">Exam Date</th>
+                    <th class="py-3 px-3">Call Status</th>
+                    <th class="py-3 px-4">Latest Remarks</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="sExamTableBody" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Dynamically loaded -->
+                </tbody>
+              </table>
+            </div>
+            <div id="sExamEmptyState" class="hidden text-center py-12">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </div>
+              <h4 class="text-sm font-bold text-slate-700">No exam students found for this month</h4>
+              <p class="text-xs text-slate-400 mt-1">Admin will publish the exam list once available.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1370,6 +1792,293 @@
   </div>
 
   <!-- RECYCLE BIN / DELETED RECORDS MODAL (ADMIN ONLY) -->
+  
+  <!-- 1. MARK STUDENT FEE PENDING MODAL (ADMIN) -->
+  <div id="markFeePendingModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="bg-gradient-to-r from-amber-600 to-amber-700 text-white p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-white/20 rounded-xl">
+            <i data-lucide="wallet" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black tracking-tight">Mark Student Fee Pending</h3>
+            <p class="text-[11px] text-amber-100 font-medium">Assign student to fee recovery calling list</p>
+          </div>
+        </div>
+        <button onclick="closeModal('markFeePendingModal')" class="p-1 rounded-xl hover:bg-white/20 text-white/80 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleMarkFeePendingSubmit(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Select Student <span class="text-rose-500">*</span></label>
+          <select id="feeStudentSelect" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            <option value="">-- Choose Student from Directory --</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Pending Amount <span class="text-rose-500">*</span></label>
+            <input type="text" id="feePendingAmountInput" placeholder="e.g. ₹2,500" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-slate-800" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Due Date</label>
+            <input type="date" id="feeDueDateInput" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Fee Notes / Installment Details</label>
+          <textarea id="feeRemarksInput" rows="2" placeholder="e.g. 2nd Installment balance, father requested 5 days..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('markFeePendingModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">Cancel</button>
+          <button type="submit" id="btnSubmitFeePending" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 font-bold text-white shadow-xs transition">Save Fee Pending</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. LOG FEE CALL REMARKS MODAL -->
+  <div id="logFeeCallModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-white/20 rounded-xl">
+            <i data-lucide="phone-call" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black tracking-tight" id="logFeeModalTitle">Fee Calling Remarks</h3>
+            <p class="text-[11px] text-amber-100 font-medium" id="logFeeModalSub">Record call outcome & payment promise</p>
+          </div>
+        </div>
+        <button onclick="closeModal('logFeeCallModal')" class="p-1 rounded-xl hover:bg-white/20 text-white/80 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleFeeCallSubmit(event)" class="p-5 space-y-3.5 text-xs">
+        <input type="hidden" id="logFeeLeadId" />
+
+        <div class="bg-amber-50 border border-amber-100 p-3 rounded-2xl flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-bold text-amber-600 uppercase">Student</div>
+            <div class="text-sm font-black text-slate-800" id="logFeeStudentName">--</div>
+            <div class="text-[11px] text-slate-500" id="logFeePhone">--</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] font-bold text-amber-600 uppercase">Pending Amount</div>
+            <div class="text-base font-black text-amber-800" id="logFeeAmount">₹0</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Call Status <span class="text-rose-500">*</span></label>
+          <select id="logFeeCallStatus" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            <option value="FEE_REMINDER">📞 Call Done - Follow-up Needed</option>
+            <option value="PROMISED_DATE">🤝 Promised to Pay on Date</option>
+            <option value="PAID">✅ Fee Paid / Collected (Clear Pending)</option>
+            <option value="RINGING">🔔 Ringing / No Answer</option>
+            <option value="SWITCHED_OFF">📵 Switched Off / Out of Coverage</option>
+            <option value="DISCOUNT_REQUESTED">⏳ Requested Time / Discount</option>
+            <option value="REFUSED">❌ Refused to Pay / Issue</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Next Follow-up / Payment Promised Date</label>
+          <input type="date" id="logFeeFollowupDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700 font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Calling Remarks / Conversation Details <span class="text-rose-500">*</span></label>
+          <textarea id="logFeeRemarks" rows="2" required placeholder="e.g. Spoke to father, will deposit fee on Monday..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('logFeeCallModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">Cancel</button>
+          <button type="submit" id="btnSaveFeeCall" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 font-bold text-white shadow-xs transition">Save Call Log</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. ADD EXAM STUDENT MODAL (ADMIN) -->
+  <div id="addExamStudentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-white/20 rounded-xl">
+            <i data-lucide="award" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black tracking-tight">Add Student to Exam Calling List</h3>
+            <p class="text-[11px] text-indigo-100 font-medium" id="addExamMonthSub">Target Month: November 2026</p>
+          </div>
+        </div>
+        <button onclick="closeModal('addExamStudentModal')" class="p-1 rounded-xl hover:bg-white/20 text-white/80 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleAddExamStudentSubmit(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Pick from Admitted Students Directory</label>
+          <select id="examPickLeadSelect" onchange="fillExamStudentFromLead(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="">-- Quick Select from All Students --</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Student Name <span class="text-rose-500">*</span></label>
+            <input type="text" id="examStudentName" required class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Father's Name</label>
+            <input type="text" id="examFatherName" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Phone Number <span class="text-rose-500">*</span></label>
+            <input type="tel" id="examPhone" required class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Learner Code / Roll No</label>
+            <input type="text" id="examLearnerCode" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Course</label>
+            <input type="text" id="examCourse" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Exam Date <span class="text-rose-500">*</span></label>
+            <input type="date" id="examDateInput" required class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Exam Notes</label>
+          <input type="text" id="examRemarksInput" placeholder="e.g. Final Semester Exam, Hall Ticket Issued" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('addExamStudentModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">Cancel</button>
+          <button type="submit" id="btnSubmitAddExamStudent" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-xs transition">Add to Exam List</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. IMPORT EXAM LIST EXCEL/CSV MODAL (ADMIN) -->
+  <div id="importExamModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-white/20 rounded-xl">
+            <i data-lucide="upload" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black tracking-tight">Import Monthly Exam List</h3>
+            <p class="text-[11px] text-slate-300 font-medium">Upload Excel / CSV received on the 23rd</p>
+          </div>
+        </div>
+        <button onclick="closeModal('importExamModal')" class="p-1 rounded-xl hover:bg-white/20 text-white/80 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleImportExamSubmit(event)" class="p-5 space-y-4 text-xs">
+        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl text-[11px] text-indigo-900 space-y-1">
+          <div class="font-bold flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-indigo-600"></i> Supported Formats:</div>
+          <p class="text-indigo-700">Excel (.xlsx, .xls) or CSV files with student name, phone, course, exam date, roll no columns.</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Target Exam Month</label>
+          <input type="text" id="importExamMonthDisplay" readonly class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 font-bold text-slate-800" value="November 2026" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Select Excel / CSV File <span class="text-rose-500">*</span></label>
+          <input type="file" id="examFileInput" accept=".xlsx,.xls,.csv" required class="w-full p-2.5 rounded-xl border border-slate-200 bg-white font-medium file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('importExamModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">Cancel</button>
+          <button type="submit" id="btnSubmitImportExam" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-xs transition">Upload & Load List</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. LOG EXAM CALL MODAL -->
+  <div id="logExamCallModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 text-white p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 bg-white/20 rounded-xl">
+            <i data-lucide="phone-call" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black tracking-tight">Exam Calling & Confirmation</h3>
+            <p class="text-[11px] text-indigo-100 font-medium">Confirm exam attendance and details</p>
+          </div>
+        </div>
+        <button onclick="closeModal('logExamCallModal')" class="p-1 rounded-xl hover:bg-white/20 text-white/80 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleExamCallSubmit(event)" class="p-5 space-y-3.5 text-xs">
+        <input type="hidden" id="logExamStudentId" />
+
+        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-bold text-indigo-600 uppercase">Exam Student</div>
+            <div class="text-sm font-black text-slate-800" id="logExamStudentName">--</div>
+            <div class="text-[11px] text-slate-500" id="logExamPhone">--</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] font-bold text-indigo-600 uppercase">Exam Date</div>
+            <div class="text-xs font-black text-indigo-800" id="logExamDate">--</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Attendance / Confirmation Status <span class="text-rose-500">*</span></label>
+          <select id="logExamCallStatus" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="CONFIRMED">✅ Confirmed (Will attend exam)</option>
+            <option value="NOT_CALLED">⏳ Not Called Yet</option>
+            <option value="ABSENT">❌ Absent / Not giving exam this month</option>
+            <option value="CALL_BACK">🔁 Call Back Later</option>
+            <option value="FEE_ISSUE">⚠️ Fee Issue / Cannot pay exam fee</option>
+            <option value="WRONG_NUMBER">📵 Switched Off / Wrong Number</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Calling Remarks / Hall Ticket Notes <span class="text-rose-500">*</span></label>
+          <textarea id="logExamRemarks" rows="2" required placeholder="e.g. Student confirmed, will arrive 30 mins before exam..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('logExamCallModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">Cancel</button>
+          <button type="submit" id="btnSaveExamCall" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-xs transition">Save Exam Status</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="trashModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
       <div class="bg-gradient-to-r from-rose-950 via-slate-900 to-rose-900 text-white p-5 flex items-center justify-between">
@@ -1456,54 +2165,81 @@
 
     function setManagerTab(tab) {
       currentManagerTab = tab;
-      const tabs = ['directory', 'enquiries', 'staff'];
+      const tabs = ['directory', 'enquiries', 'fees', 'exams', 'staff'];
       tabs.forEach(t => {
         const btn = document.getElementById(`mTabBtn-${t}`);
-        const panel = document.getElementById(t === 'enquiries' ? 'mEnquiriesPanel' : (t === 'directory' ? 'mDirectoryPanel' : 'mStaffPanel'));
+        let panel = document.getElementById('mDirectoryPanel');
+        if (t === 'enquiries') panel = document.getElementById('mEnquiriesPanel');
+        else if (t === 'fees') panel = document.getElementById('mFeesPanel');
+        else if (t === 'exams') panel = document.getElementById('mExamsPanel');
+        else if (t === 'staff') panel = document.getElementById('mStaffPanel');
+
         if (t === tab) {
-          if (t === 'directory') {
-            btn.className = 'm-tab px-5 py-3 rounded-2xl text-xs font-black transition flex items-center gap-2 bg-emerald-600 text-white shadow-md';
-          } else if (t === 'enquiries') {
-            btn.className = 'm-tab px-5 py-3 rounded-2xl text-xs font-black transition flex items-center gap-2 bg-rose-600 text-white shadow-md';
-          } else {
-            btn.className = 'm-tab px-4 py-3 rounded-2xl text-xs font-black transition flex items-center gap-2 bg-indigo-600 text-white shadow-md';
+          if (btn) {
+            if (t === 'directory') {
+              btn.className = 'm-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-emerald-600 text-white shadow-xs';
+            } else if (t === 'enquiries') {
+              btn.className = 'm-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-rose-600 text-white shadow-xs';
+            } else if (t === 'fees') {
+              btn.className = 'm-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-600 text-white shadow-xs';
+            } else if (t === 'exams') {
+              btn.className = 'm-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-xs';
+            } else {
+              btn.className = 'm-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 text-white shadow-xs';
+            }
           }
           if (panel) panel.classList.remove('hidden');
+
+          if (t === 'fees') loadFeesStudents();
+          else if (t === 'exams') { loadExamMonths(); loadExamStudents(); }
+          else if (t === 'enquiries') loadManagerEnquiries();
+          else if (t === 'directory') loadManagerLeads();
         } else {
-          btn.className = 'm-tab px-4 py-3 rounded-2xl text-xs font-bold transition text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 flex items-center gap-2';
+          if (btn) {
+            btn.className = 'm-tab px-4 py-2.5 rounded-xl text-xs font-bold transition text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2';
+          }
           if (panel) panel.classList.add('hidden');
         }
       });
+      lucide.createIcons();
     }
 
     function setStaffMode(mode) {
       currentStaffMode = mode;
-      const enqBtn = document.getElementById('sModeBtn-enquiries');
-      const admBtn = document.getElementById('sModeBtn-admitted');
-      const enqPanel = document.getElementById('sMyEnquiriesPanel');
-      const admPanel = document.getElementById('sAdmittedStudentsPanel');
+      const modes = ['admitted', 'enquiries', 'fees', 'exams'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`sModeBtn-${m}`);
+        let panel = document.getElementById('sAdmittedStudentsPanel');
+        if (m === 'enquiries') panel = document.getElementById('sMyEnquiriesPanel');
+        else if (m === 'fees') panel = document.getElementById('sFeesPanel');
+        else if (m === 'exams') panel = document.getElementById('sExamsPanel');
 
-      if (mode === 'enquiries') {
-        if (enqBtn) {
-          enqBtn.className = 's-mode-btn px-5 py-3 rounded-xl text-xs font-black transition flex items-center gap-2 bg-rose-600 text-white shadow-md ring-2 ring-rose-500/30';
+        if (m === mode) {
+          if (btn) {
+            if (m === 'admitted') {
+              btn.className = 's-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-emerald-600 text-white shadow-xs';
+            } else if (m === 'enquiries') {
+              btn.className = 's-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-rose-600 text-white shadow-xs';
+            } else if (m === 'fees') {
+              btn.className = 's-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-600 text-white shadow-xs';
+            } else if (m === 'exams') {
+              btn.className = 's-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-indigo-600 text-white shadow-xs';
+            }
+          }
+          if (panel) panel.classList.remove('hidden');
+
+          if (m === 'fees') loadFeesStudents();
+          else if (m === 'exams') { loadExamMonths(); loadExamStudents(); }
+          else if (m === 'enquiries') loadStaffEnquiries();
+          else loadStaffLeads();
+        } else {
+          if (btn) {
+            btn.className = 's-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200';
+          }
+          if (panel) panel.classList.add('hidden');
         }
-        if (admBtn) {
-          admBtn.className = 's-mode-btn px-5 py-3 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200';
-        }
-        if (enqPanel) enqPanel.classList.remove('hidden');
-        if (admPanel) admPanel.classList.add('hidden');
-        loadStaffEnquiries();
-      } else {
-        if (admBtn) {
-          admBtn.className = 's-mode-btn px-5 py-3 rounded-xl text-xs font-black transition flex items-center gap-2 bg-emerald-600 text-white shadow-md ring-2 ring-emerald-500/30';
-        }
-        if (enqBtn) {
-          enqBtn.className = 's-mode-btn px-5 py-3 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200';
-        }
-        if (admPanel) admPanel.classList.remove('hidden');
-        if (enqPanel) enqPanel.classList.add('hidden');
-        loadStaffLeads();
-      }
+      });
+      lucide.createIcons();
     }
 
     function showToast(msg, isSuccess = true) {
@@ -1722,6 +2458,7 @@
 
         setManagerTab('directory');
         loadManagerData();
+        loadExamMonths();
       } else {
         document.getElementById('staffSection').classList.remove('hidden');
         document.getElementById('managerSection').classList.add('hidden');
@@ -1743,6 +2480,7 @@
         // Always default to Admitted Students Master Directory!
         setStaffMode('admitted');
         loadStaffData();
+        loadExamMonths();
       }
       lucide.createIcons();
     }
@@ -1816,6 +2554,8 @@
       if (document.getElementById('mStatCallsToday')) document.getElementById('mStatCallsToday').innerText = data.calls_today || 0;
       if (document.getElementById('mBadgeEnquiries')) document.getElementById('mBadgeEnquiries').innerText = data.total_enquiries || 0;
       if (document.getElementById('mBadgeAdmitted')) document.getElementById('mBadgeAdmitted').innerText = Number(data.total_admitted_students || 1929).toLocaleString();
+      if (document.getElementById('mBadgeFees')) document.getElementById('mBadgeFees').innerText = data.total_fees_pending || 0;
+      if (document.getElementById('mBadgeExams')) document.getElementById('mBadgeExams').innerText = `Nov (${data.total_exam_students || 0})`;
 
       const mDirCounter = document.getElementById('mDirectoryCounter');
       if (mDirCounter) mDirCounter.innerText = Number(data.total_admitted_students || 1927).toLocaleString() + ' Active Records';
@@ -2398,7 +3138,13 @@
                 Call
               </button>
               ${(currentUser && currentUser.permissions && currentUser.permissions.can_edit)
-                ? `<button onclick="openEditStudentModal(${l.id})" class="p-1.5 bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-700 rounded-lg transition" title="Edit Student">
+                ? `<button onclick="openMarkFeePendingModal(${l.id}, '${escapedStudentName}', '${l.phone}')" class="p-1.5 bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 rounded-lg transition" title="Mark Fee Pending">
+                    <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="quickAddLeadToExam(${l.id}, '${escapedStudentName}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 rounded-lg transition" title="Add to Exam Calling List">
+                    <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="openEditStudentModal(${l.id})" class="p-1.5 bg-slate-50 hover:bg-slate-500 hover:text-white text-slate-700 rounded-lg transition" title="Edit Student">
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                   </button>`
                 : ''
@@ -3114,6 +3860,8 @@
       if (b3) b3.innerText = Number(data.total_admitted_leads || 1927).toLocaleString();
       const b4 = document.getElementById('sTabBadgeFollowup');
       if (b4) b4.innerText = data.followups_due || 0;
+      if (document.getElementById('sBadgeFeesStaff')) document.getElementById('sBadgeFeesStaff').innerText = data.total_fees_pending || 0;
+      if (document.getElementById('sBadgeExamsStaff')) document.getElementById('sBadgeExamsStaff').innerText = `Nov (${data.total_exam_students || 0})`;
       const tfBadge = document.getElementById('tabBadgeFollowup');
       if (tfBadge) tfBadge.innerText = data.followups_due || 0;
       const tfBadgeEnq = document.getElementById('sTabBadgeFollowupEnq');
@@ -3826,6 +4574,696 @@
     window.addEventListener('DOMContentLoaded', () => {
       checkAuth();
     });
+  
+
+    // ==========================================
+    // FEES PENDING SYSTEM JAVASCRIPT LOGIC
+    // ==========================================
+    let feesStudentsList = [];
+    let currentFeeFilter = 'all';
+    let feeSearchTimeout = null;
+
+    async function loadFeesStudents(forceFetch = false) {
+      try {
+        const res = await fetch(`/api/fees/students?filter=${currentFeeFilter}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        feesStudentsList = data.students || [];
+
+        // Update badges
+        const count = data.total_pending || 0;
+        const b1 = document.getElementById('mBadgeFees');
+        if (b1) b1.innerText = `${count}`;
+        const b2 = document.getElementById('sBadgeFeesStaff');
+        if (b2) b2.innerText = `${count}`;
+        const b3 = document.getElementById('mFeesCountBadge');
+        if (b3) b3.innerText = `${count} Students`;
+        const b4 = document.getElementById('sFeesCountBadge');
+        if (b4) b4.innerText = `${count} Students`;
+
+        // Update overdue badge
+        const todayStr = new Date().toISOString().split('T')[0];
+        const overdueCount = feesStudentsList.filter(s => s.fee_due_date && s.fee_due_date < todayStr).length;
+        const ob1 = document.getElementById('mBadgeFeeOverdue');
+        if (ob1) ob1.innerText = overdueCount;
+        const ob2 = document.getElementById('sBadgeFeeOverdue');
+        if (ob2) ob2.innerText = overdueCount;
+
+        renderFeesStudents();
+      } catch (err) {
+        console.error('Error loading fees students:', err);
+      }
+    }
+
+    function setFeeFilter(filter) {
+      currentFeeFilter = filter;
+      document.querySelectorAll('.m-fee-filter-btn, .s-fee-filter-btn').forEach(btn => {
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition';
+      });
+      const active1 = document.getElementById(`mFeeFilterBtn-${filter}`);
+      if (active1) active1.className = 'm-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs';
+      const active2 = document.getElementById(`sFeeFilterBtn-${filter}`);
+      if (active2) active2.className = 's-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs';
+
+      loadFeesStudents();
+    }
+
+    function debounceFeesSearch() {
+      clearTimeout(feeSearchTimeout);
+      feeSearchTimeout = setTimeout(() => {
+        renderFeesStudents();
+      }, 250);
+    }
+
+    function renderFeesStudents() {
+      const isMgr = currentUser && (currentUser.role === 'manager' || (currentUser.permissions && currentUser.permissions.can_edit));
+      const tbody = document.getElementById(isMgr ? 'mFeesTableBody' : 'sFeesTableBody');
+      const emptyState = document.getElementById(isMgr ? 'mFeesEmptyState' : 'sFeesEmptyState');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      const search = (document.getElementById(isMgr ? 'mFeeSearchInput' : 'sFeeSearchInput')?.value || '').toLowerCase().trim();
+
+      let filtered = feesStudentsList;
+      if (search) {
+        filtered = filtered.filter(s => 
+          (s.name && s.name.toLowerCase().includes(search)) ||
+          (s.father_name && s.father_name.toLowerCase().includes(search)) ||
+          (s.phone && s.phone.includes(search)) ||
+          (s.course && s.course.toLowerCase().includes(search)) ||
+          (s.batch && s.batch.toLowerCase().includes(search))
+        );
+      }
+
+      if (filtered.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+      if (emptyState) emptyState.classList.add('hidden');
+
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      filtered.forEach((s, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+
+        let dueDateBadge = '<span class="text-slate-400 font-medium text-[11px]">Not Set</span>';
+        if (s.fee_due_date) {
+          if (s.fee_due_date < todayStr) {
+            dueDateBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Overdue (${s.fee_due_date})</span>`;
+          } else if (s.fee_due_date === todayStr) {
+            dueDateBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Due Today</span>`;
+          } else {
+            dueDateBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">${s.fee_due_date}</span>`;
+          }
+        }
+
+        const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
+        const waLink = `https://wa.me/91${phoneClean}`;
+        const telLink = `tel:${phoneClean}`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-black text-slate-800 text-xs">${s.name}</div>
+            <div class="text-[11px] text-slate-400">Father: ${s.father_name || '--'}</div>
+          </td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1.5">
+              <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
+                <span>${s.phone}</span>
+              </a>
+              <a href="${waLink}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp Message">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+            ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${s.alt_phone}</div>` : ''}
+          </td>
+          <td class="py-3 px-3">
+            <div class="font-bold text-slate-700">${s.course || 'Course'}</div>
+            <div class="text-[10px] text-slate-400 font-medium">${s.batch || 'Batch'}</div>
+          </td>
+          <td class="py-3 px-3 font-black text-amber-700 text-xs">
+            ${s.fee_pending_amount || 'Pending'}
+          </td>
+          <td class="py-3 px-3">
+            ${dueDateBadge}
+          </td>
+          <td class="py-3 px-4">
+            <div class="text-xs text-slate-700 font-medium">${s.fee_remarks || s.last_remarks || 'No remarks logged'}</div>
+            ${s.last_caller_name ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${s.last_caller_name}</div>` : ''}
+          </td>
+          <td class="py-3 px-4 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs">
+                <i data-lucide="phone-call" class="w-3 h-3"></i>
+                <span>Call Log</span>
+              </button>
+              ${isMgr ? `
+                <button onclick="handleMarkFeePaid(${s.id}, '${escapeHtml(s.name)}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Mark Fee Paid">
+                  <i data-lucide="check" class="w-3 h-3"></i>
+                  <span>Paid</span>
+                </button>
+                <button onclick="openMarkFeePendingModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Edit Fee Amount/Date">
+                  <i data-lucide="edit-3" class="w-3 h-3"></i>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons({ root: tbody });
+    }
+
+    function openMarkFeePendingModal(leadId = null, name = '', phone = '') {
+      const select = document.getElementById('feeStudentSelect');
+      if (select) {
+        select.innerHTML = '<option value="">-- Choose Student from Directory --</option>';
+        managerLeads.slice(0, 300).forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          opt.innerText = `${l.name} (${l.phone}) - ${l.course || ''}`;
+          if (leadId && l.id === leadId) opt.selected = true;
+          select.appendChild(opt);
+        });
+        if (leadId && !managerLeads.some(l => l.id === leadId)) {
+          const opt = document.createElement('option');
+          opt.value = leadId;
+          opt.innerText = `${name} (${phone})`;
+          opt.selected = true;
+          select.appendChild(opt);
+        }
+      }
+      openModal('markFeePendingModal');
+    }
+
+    async function handleMarkFeePendingSubmit(e) {
+      e.preventDefault();
+      const leadId = document.getElementById('feeStudentSelect').value;
+      const amount = document.getElementById('feePendingAmountInput').value;
+      const dueDate = document.getElementById('feeDueDateInput').value;
+      const remarks = document.getElementById('feeRemarksInput').value;
+
+      try {
+        const res = await fetch('/api/fees/mark-pending', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: leadId, amount, due_date: dueDate, remarks })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Fee pending recorded!');
+          closeModal('markFeePendingModal');
+          loadFeesStudents(true);
+        } else {
+          showToast(data.error || 'Failed to save', false);
+        }
+      } catch (err) {
+        showToast('Network connection error', false);
+      }
+    }
+
+    async function handleMarkFeePaid(leadId, studentName) {
+      if (!confirm(`Mark fee as PAID for student '${studentName}'? This will clear them from the pending list.`)) return;
+      try {
+        const res = await fetch('/api/fees/mark-paid', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: leadId, remarks: 'Payment received' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Fee marked as paid!');
+          loadFeesStudents(true);
+        } else {
+          showToast(data.error || 'Failed to update', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    function openLogFeeCallModal(leadId, studentName, phone, amount) {
+      document.getElementById('logFeeLeadId').value = leadId;
+      document.getElementById('logFeeStudentName').innerText = studentName;
+      document.getElementById('logFeePhone').innerText = phone;
+      document.getElementById('logFeeAmount').innerText = amount || 'Pending';
+      openModal('logFeeCallModal');
+    }
+
+    async function handleFeeCallSubmit(e) {
+      e.preventDefault();
+      const leadId = document.getElementById('logFeeLeadId').value;
+      const status = document.getElementById('logFeeCallStatus').value;
+      const followupDate = document.getElementById('logFeeFollowupDate').value;
+      const remarks = document.getElementById('logFeeRemarks').value;
+
+      try {
+        if (status === 'PAID') {
+          await fetch('/api/fees/mark-paid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lead_id: leadId, remarks })
+          });
+        } else {
+          await fetch('/api/fees/log-call', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lead_id: leadId, status, remarks, next_followup_date: followupDate })
+          });
+        }
+        showToast('Fee calling remark saved!');
+        closeModal('logFeeCallModal');
+        loadFeesStudents(true);
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    // ==========================================
+    // MONTHLY CALL FOR EXAM JAVASCRIPT LOGIC
+    // ==========================================
+    let examStudentsList = [];
+    let examMonthsList = [];
+    let currentExamMonthCode = '2026-11';
+    let currentExamFilter = 'all';
+    let isExamVisibleToStaff = true;
+    let examSearchTimeout = null;
+
+    async function loadExamMonths() {
+      try {
+        const res = await fetch('/api/exams/months');
+        if (!res.ok) return;
+        const data = await res.json();
+        examMonthsList = data.months || [];
+        if (data.current_month) currentExamMonthCode = data.current_month;
+
+        const sel = document.getElementById('mExamMonthSelector');
+        if (sel) {
+          sel.innerHTML = '';
+          examMonthsList.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.month_code;
+            opt.innerText = `${m.month_name} (${m.total_students || 0} Students)`;
+            if (m.month_code === currentExamMonthCode) opt.selected = true;
+            sel.appendChild(opt);
+          });
+        }
+
+        const b1 = document.getElementById('mExamActiveMonthBadge');
+        if (b1) b1.innerText = `${currentExamMonthCode}`;
+        const b2 = document.getElementById('sExamActiveMonthBadge');
+        if (b2) b2.innerText = `${currentExamMonthCode}`;
+
+        if (!data.is_admin && !data.visible) {
+          isExamVisibleToStaff = false;
+        } else {
+          isExamVisibleToStaff = true;
+        }
+
+        updateExamVisibilityUI();
+      } catch (err) {
+        console.error('Error loading exam months:', err);
+      }
+    }
+
+    function updateExamVisibilityUI() {
+      const toggleText = document.getElementById('mExamVisibilityToggleText');
+      const toggleBtn = document.getElementById('mExamVisibilityToggleBtn');
+      if (toggleText && toggleBtn) {
+        if (isExamVisibleToStaff) {
+          toggleText.innerText = 'Staff: Visible (ON)';
+          toggleBtn.className = 'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition shadow-xs bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100';
+        } else {
+          toggleText.innerText = 'Staff: Hidden (OFF)';
+          toggleBtn.className = 'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition shadow-xs bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100';
+        }
+      }
+
+      const staffNotice = document.getElementById('sExamStaffHiddenNotice');
+      const staffContent = document.getElementById('sExamMainContent');
+      if (staffNotice && staffContent) {
+        if (!isExamVisibleToStaff) {
+          staffNotice.classList.remove('hidden');
+          staffContent.classList.add('hidden');
+        } else {
+          staffNotice.classList.add('hidden');
+          staffContent.classList.remove('hidden');
+        }
+      }
+    }
+
+    async function toggleExamVisibility() {
+      const newVisibility = !isExamVisibleToStaff;
+      try {
+        const res = await fetch('/api/exams/settings/visibility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ month_code: currentExamMonthCode, is_visible: newVisibility ? 1 : 0 })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          isExamVisibleToStaff = newVisibility;
+          updateExamVisibilityUI();
+          showToast(data.message || 'Visibility updated!');
+        } else {
+          showToast(data.error || 'Failed to update visibility', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    function changeExamMonth(monthCode) {
+      currentExamMonthCode = monthCode;
+      loadExamStudents();
+    }
+
+    async function loadExamStudents(forceFetch = false) {
+      try {
+        const res = await fetch(`/api/exams/students?month=${currentExamMonthCode}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        examStudentsList = data.students || [];
+
+        if (data.stats) {
+          const ids = ['m', 's'];
+          ids.forEach(p => {
+            const st = document.getElementById(`${p}ExamStatTotal`);
+            if (st) st.innerText = data.stats.total || 0;
+            const sc = document.getElementById(`${p}ExamStatConfirmed`);
+            if (sc) sc.innerText = data.stats.confirmed || 0;
+            const sn = document.getElementById(`${p}ExamStatNotCalled`);
+            if (sn) sn.innerText = data.stats.not_called || 0;
+            const sa = document.getElementById(`${p}ExamStatAbsent`);
+            if (sa) sa.innerText = data.stats.absent || 0;
+            const scb = document.getElementById(`${p}ExamStatCallback`);
+            if (scb) scb.innerText = (data.stats.call_back || 0) + (data.stats.fee_issue || 0);
+          });
+        }
+
+        const b1 = document.getElementById('mBadgeExams');
+        if (b1) b1.innerText = `Nov (${examStudentsList.length})`;
+        const b2 = document.getElementById('sBadgeExamsStaff');
+        if (b2) b2.innerText = `Nov (${examStudentsList.length})`;
+
+        renderExamStudents();
+      } catch (err) {
+        console.error('Error loading exam students:', err);
+      }
+    }
+
+    function setExamFilter(filter) {
+      currentExamFilter = filter;
+      document.querySelectorAll('.m-exam-filter-btn, .s-exam-filter-btn').forEach(btn => {
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition';
+      });
+      const active1 = document.getElementById(`mExamFilterBtn-${filter}`);
+      if (active1) active1.className = 'm-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-xs';
+      const active2 = document.getElementById(`sExamFilterBtn-${filter}`);
+      if (active2) active2.className = 's-exam-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-xs';
+
+      renderExamStudents();
+    }
+
+    function debounceExamSearch() {
+      clearTimeout(examSearchTimeout);
+      examSearchTimeout = setTimeout(() => {
+        renderExamStudents();
+      }, 250);
+    }
+
+    function renderExamStudents() {
+      const isMgr = currentUser && (currentUser.role === 'manager' || (currentUser.permissions && currentUser.permissions.can_edit));
+      const tbody = document.getElementById(isMgr ? 'mExamTableBody' : 'sExamTableBody');
+      const emptyState = document.getElementById(isMgr ? 'mExamEmptyState' : 'sExamEmptyState');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      const search = (document.getElementById(isMgr ? 'mExamSearchInput' : 'sExamSearchInput')?.value || '').toLowerCase().trim();
+
+      let filtered = examStudentsList;
+      if (currentExamFilter !== 'all') {
+        filtered = filtered.filter(s => s.call_status === currentExamFilter);
+      }
+
+      if (search) {
+        filtered = filtered.filter(s => 
+          (s.student_name && s.student_name.toLowerCase().includes(search)) ||
+          (s.father_name && s.father_name.toLowerCase().includes(search)) ||
+          (s.phone && s.phone.includes(search)) ||
+          (s.course && s.course.toLowerCase().includes(search)) ||
+          (s.learner_code && s.learner_code.toLowerCase().includes(search))
+        );
+      }
+
+      if (filtered.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+      if (emptyState) emptyState.classList.add('hidden');
+
+      filtered.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+
+        let statusBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Not Called</span>';
+        if (s.call_status === 'CONFIRMED') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-200 flex items-center gap-1 w-fit"><i data-lucide="check" class="w-3 h-3"></i> Confirmed</span>';
+        } else if (s.call_status === 'ABSENT') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Absent</span>';
+        } else if (s.call_status === 'CALL_BACK') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Call Back</span>';
+        } else if (s.call_status === 'FEE_ISSUE') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black border border-purple-200">Fee Issue</span>';
+        }
+
+        const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
+        const waLink = `https://wa.me/91${phoneClean}`;
+        const telLink = `tel:${phoneClean}`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-black text-slate-800 text-xs">${s.student_name}</div>
+            <div class="text-[11px] text-slate-400">Father: ${s.father_name || '--'}</div>
+          </td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1.5">
+              <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
+                <span>${s.phone}</span>
+              </a>
+              <a href="${waLink}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+            ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${s.alt_phone}</div>` : ''}
+          </td>
+          <td class="py-3 px-3">
+            <div class="font-bold text-slate-700">${s.course || 'Course'}</div>
+            <div class="text-[10px] font-mono text-slate-500 font-bold">${s.learner_code || '--'}</div>
+          </td>
+          <td class="py-3 px-3 font-bold text-indigo-700 text-xs">
+            ${s.exam_date || 'TBD'}
+          </td>
+          <td class="py-3 px-3">
+            ${statusBadge}
+          </td>
+          <td class="py-3 px-4">
+            <div class="text-xs text-slate-700 font-medium">${s.remarks || 'No remarks'}</div>
+            ${s.last_called_by ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${s.last_called_by}</div>` : ''}
+          </td>
+          <td class="py-3 px-4 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="openLogExamCallModal(${s.id}, '${escapeHtml(s.student_name)}', '${s.phone}', '${escapeHtml(s.course || '')}', '${s.exam_date || ''}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs">
+                <i data-lucide="phone-call" class="w-3 h-3"></i>
+                <span>Confirm</span>
+              </button>
+              ${isMgr ? `
+                <button onclick="deleteExamStudent(${s.id}, '${escapeHtml(s.student_name)}')" class="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 rounded-lg transition" title="Remove from Exam List">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons({ root: tbody });
+    }
+
+    function openAddExamStudentModal(leadId = null, name = '') {
+      const select = document.getElementById('examPickLeadSelect');
+      if (select) {
+        select.innerHTML = '<option value="">-- Quick Select from All Students --</option>';
+        managerLeads.slice(0, 300).forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          opt.innerText = `${l.name} (${l.phone}) - ${l.course || ''}`;
+          if (leadId && l.id === leadId) opt.selected = true;
+          select.appendChild(opt);
+        });
+      }
+      openModal('addExamStudentModal');
+    }
+
+    function fillExamStudentFromLead(leadId) {
+      if (!leadId) return;
+      const lead = managerLeads.find(l => l.id == leadId);
+      if (!lead) return;
+      document.getElementById('examStudentName').value = lead.name || '';
+      document.getElementById('examFatherName').value = lead.father_name || '';
+      document.getElementById('examPhone').value = lead.phone || '';
+      document.getElementById('examLearnerCode').value = lead.learner_code || '';
+      document.getElementById('examCourse').value = lead.course || '';
+    }
+
+    async function handleAddExamStudentSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        month_code: currentExamMonthCode,
+        student_name: document.getElementById('examStudentName').value,
+        father_name: document.getElementById('examFatherName').value,
+        phone: document.getElementById('examPhone').value,
+        learner_code: document.getElementById('examLearnerCode').value,
+        course: document.getElementById('examCourse').value,
+        exam_date: document.getElementById('examDateInput').value,
+        remarks: document.getElementById('examRemarksInput').value
+      };
+
+      try {
+        const res = await fetch('/api/exams/students/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Added to exam list!');
+          closeModal('addExamStudentModal');
+          loadExamStudents(true);
+        } else {
+          showToast(data.error || 'Failed to add', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    async function quickAddLeadToExam(leadId, studentName) {
+      const examDate = prompt(`Enter exam date for student '${studentName}':`, new Date().toISOString().split('T')[0]);
+      if (!examDate) return;
+      try {
+        const res = await fetch('/api/exams/students/add-from-leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: leadId, month_code: currentExamMonthCode, exam_date: examDate })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Added to exam list!');
+          loadExamStudents(true);
+        } else {
+          showToast(data.error || 'Failed to add', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    function openImportExamModal() {
+      openModal('importExamModal');
+    }
+
+    async function handleImportExamSubmit(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('examFileInput');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        showToast('Please select a file', false);
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('month_code', currentExamMonthCode);
+
+      try {
+        const res = await fetch('/api/exams/students/import', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Exam list imported successfully!');
+          closeModal('importExamModal');
+          loadExamStudents(true);
+        } else {
+          showToast(data.error || 'Import failed', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    function openLogExamCallModal(id, studentName, phone, course, examDate) {
+      document.getElementById('logExamStudentId').value = id;
+      document.getElementById('logExamStudentName').innerText = studentName;
+      document.getElementById('logExamPhone').innerText = phone;
+      document.getElementById('logExamDate').innerText = examDate || 'TBD';
+      openModal('logExamCallModal');
+    }
+
+    async function handleExamCallSubmit(e) {
+      e.preventDefault();
+      const studentId = document.getElementById('logExamStudentId').value;
+      const callStatus = document.getElementById('logExamCallStatus').value;
+      const remarks = document.getElementById('logExamRemarks').value;
+
+      try {
+        const res = await fetch(`/api/exams/students/${studentId}/call`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ call_status: callStatus, remarks })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Exam call status updated!');
+          closeModal('logExamCallModal');
+          loadExamStudents(true);
+        } else {
+          showToast(data.error || 'Failed to update', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    async function deleteExamStudent(studentId, name) {
+      if (!confirm(`Remove student '${name}' from this month's exam list?`)) return;
+      try {
+        const res = await fetch(`/api/exams/students/${studentId}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Removed from exam list');
+          loadExamStudents(true);
+        } else {
+          showToast(data.error || 'Failed to delete', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
   </script>
 </body>
 </html>

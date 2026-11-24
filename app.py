@@ -155,6 +155,55 @@ def init_db():
             cursor.execute("ALTER TABLE leads ADD COLUMN is_deleted INTEGER DEFAULT 0")
         if "deleted_at" not in columns:
             cursor.execute("ALTER TABLE leads ADD COLUMN deleted_at TEXT")
+        if "is_fee_pending" not in columns:
+            cursor.execute("ALTER TABLE leads ADD COLUMN is_fee_pending INTEGER DEFAULT 0")
+        if "fee_pending_amount" not in columns:
+            cursor.execute("ALTER TABLE leads ADD COLUMN fee_pending_amount TEXT DEFAULT ''")
+        if "fee_due_date" not in columns:
+            cursor.execute("ALTER TABLE leads ADD COLUMN fee_due_date TEXT DEFAULT ''")
+        if "fee_remarks" not in columns:
+            cursor.execute("ALTER TABLE leads ADD COLUMN fee_remarks TEXT DEFAULT ''")
+
+        # Monthly Exam Calling Students Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS exam_students (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                month_code TEXT NOT NULL,
+                month_name TEXT NOT NULL,
+                student_id INTEGER,
+                student_name TEXT NOT NULL,
+                father_name TEXT,
+                phone TEXT NOT NULL,
+                alt_phone TEXT,
+                course TEXT,
+                batch TEXT,
+                learner_code TEXT,
+                exam_date TEXT,
+                call_status TEXT DEFAULT 'NOT_CALLED',
+                last_called_by TEXT,
+                last_call_at TEXT,
+                remarks TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES leads(id)
+            )
+        """)
+
+        # Exam Month Settings Table (for admin visibility toggle & monthly archive)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS exam_month_settings (
+                month_code TEXT PRIMARY KEY,
+                month_name TEXT NOT NULL,
+                is_visible_to_staff INTEGER DEFAULT 1,
+                is_active INTEGER DEFAULT 1,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Seed current month if not exists
+        cursor.execute("""
+            INSERT OR IGNORE INTO exam_month_settings (month_code, month_name, is_visible_to_staff, is_active)
+            VALUES ('2026-11', 'November 2026', 1, 1)
+        """)
 
         # Call logs table
         cursor.execute("""
@@ -894,6 +943,19 @@ def staff_stats():
         """, (user_id, today_str))
         followups_due = cursor.fetchone()[0]
 
+        # Fees Pending count
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE (record_type = 'admitted' OR record_type IS NULL) AND (is_deleted = 0 OR is_deleted IS NULL) AND is_fee_pending = 1")
+        total_fees_pending = cursor.fetchone()[0]
+
+        # Current Month Exam Calling info
+        curr_m_code = date.today().strftime("%Y-%m")
+        cursor.execute("SELECT is_visible_to_staff FROM exam_month_settings WHERE month_code = ?", (curr_m_code,))
+        exam_vis_row = cursor.fetchone()
+        exam_visible_to_staff = exam_vis_row["is_visible_to_staff"] if exam_vis_row else 1
+
+        cursor.execute("SELECT COUNT(*) FROM exam_students WHERE month_code = ?", (curr_m_code,))
+        total_exam_students = cursor.fetchone()[0] if exam_visible_to_staff else 0
+
         return jsonify({
             "total_leads": total_shared_leads,
             "total_admitted_leads": total_shared_leads,
@@ -903,7 +965,11 @@ def staff_stats():
             "my_enquiries_pending": my_enquiries_pending,
             "calls_today": my_calls_today,
             "followups_due": followups_due,
-            "admissions": my_admissions_done
+            "admissions": my_admissions_done,
+            "total_fees_pending": total_fees_pending,
+            "total_exam_students": total_exam_students,
+            "exam_visible_to_staff": exam_visible_to_staff,
+            "current_exam_month": curr_m_code
         })
 
 
@@ -980,6 +1046,19 @@ def manager_stats():
             s["conversion_rate"] = round((adm / assigned * 100), 1) if assigned > 0 else 0
             staff_list.append(s)
 
+        # Fees Pending count
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE (record_type = 'admitted' OR record_type IS NULL) AND (is_deleted = 0 OR is_deleted IS NULL) AND is_fee_pending = 1")
+        total_fees_pending = cursor.fetchone()[0]
+
+        # Current Month Exam Calling info
+        curr_m_code = date.today().strftime("%Y-%m")
+        cursor.execute("SELECT is_visible_to_staff FROM exam_month_settings WHERE month_code = ?", (curr_m_code,))
+        exam_vis_row = cursor.fetchone()
+        exam_visible_to_staff = exam_vis_row["is_visible_to_staff"] if exam_vis_row else 1
+
+        cursor.execute("SELECT COUNT(*) FROM exam_students WHERE month_code = ?", (curr_m_code,))
+        total_exam_students = cursor.fetchone()[0]
+
         return jsonify({
             "total_leads": total_admitted_students,
             "total_admitted_students": total_admitted_students,
@@ -991,6 +1070,10 @@ def manager_stats():
             "pending_followups": pending_followups,
             "total_admissions": enquiries_converted,
             "total_trash": total_trash,
+            "total_fees_pending": total_fees_pending,
+            "total_exam_students": total_exam_students,
+            "exam_visible_to_staff": exam_visible_to_staff,
+            "current_exam_month": curr_m_code,
             "staff_performance": staff_list
         })
 
@@ -1809,6 +1892,536 @@ def manager_export_leads():
     output.headers["Content-Disposition"] = f"attachment; filename=focus_institute_students_{date.today().isoformat()}.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+
+# -------------------------------------------------------------
+# FEES PENDING CALLING SYSTEM APIS
+# -------------------------------------------------------------
+
+@app.route("/api/fees/students", methods=["GET"])
+@login_required
+def get_fees_students():
+    search = request.args.get("search", "").strip()
+    status_filter = request.args.get("filter", "all").strip()
+    today_str = date.today().isoformat()
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+
+        if status_filter == "paid":
+            query = """
+                SELECT l.id, l.name, l.father_name, l.phone, l.alt_phone, l.course, l.batch, l.learner_code, l.city,
+                       l.fee_pending_amount, l.fee_due_date, l.fee_remarks, l.is_fee_pending, l.last_call_at,
+                       u.name as last_caller_name,
+                       (SELECT remarks FROM call_logs WHERE lead_id = l.id ORDER BY id DESC LIMIT 1) as last_remarks,
+                       (SELECT COUNT(*) FROM call_logs WHERE lead_id = l.id) as total_calls
+                FROM leads l
+                LEFT JOIN users u ON l.last_caller_id = u.id
+                WHERE (l.record_type = 'admitted' OR l.record_type IS NULL) 
+                  AND (l.is_deleted = 0 OR l.is_deleted IS NULL)
+                  AND l.is_fee_pending = 0
+                  AND (l.fee_remarks LIKE '%Paid%' OR (l.fee_pending_amount != '' AND l.fee_pending_amount IS NOT NULL))
+            """
+        else:
+            query = """
+                SELECT l.id, l.name, l.father_name, l.phone, l.alt_phone, l.course, l.batch, l.learner_code, l.city,
+                       l.fee_pending_amount, l.fee_due_date, l.fee_remarks, l.is_fee_pending, l.last_call_at,
+                       u.name as last_caller_name,
+                       (SELECT remarks FROM call_logs WHERE lead_id = l.id ORDER BY id DESC LIMIT 1) as last_remarks,
+                       (SELECT COUNT(*) FROM call_logs WHERE lead_id = l.id) as total_calls
+                FROM leads l
+                LEFT JOIN users u ON l.last_caller_id = u.id
+                WHERE (l.record_type = 'admitted' OR l.record_type IS NULL) 
+                  AND (l.is_deleted = 0 OR l.is_deleted IS NULL)
+                  AND l.is_fee_pending = 1
+            """
+        params = []
+
+        if status_filter == "overdue":
+            query += " AND l.fee_due_date != '' AND l.fee_due_date < ?"
+            params.append(today_str)
+        elif status_filter == "today":
+            query += " AND l.fee_due_date = ?"
+            params.append(today_str)
+        elif status_filter == "upcoming":
+            query += " AND l.fee_due_date > ?"
+            params.append(today_str)
+
+        if search:
+            query += """ AND (
+                l.name LIKE ? OR l.father_name LIKE ? OR l.phone LIKE ? OR 
+                l.alt_phone LIKE ? OR l.course LIKE ? OR l.batch LIKE ? OR l.learner_code LIKE ?
+            )"""
+            w = f"%{search}%"
+            params.extend([w, w, w, w, w, w, w])
+
+        query += " ORDER BY CASE WHEN l.fee_due_date != '' THEN l.fee_due_date ELSE '9999-99-99' END ASC, l.name ASC"
+        cursor.execute(query, params)
+        rows = [dict(r) for r in cursor.fetchall()]
+
+        cursor.execute("SELECT COUNT(*) as cnt FROM leads WHERE (record_type = 'admitted' OR record_type IS NULL) AND (is_deleted = 0 OR is_deleted IS NULL) AND is_fee_pending = 1")
+        total_pending = cursor.fetchone()["cnt"]
+
+    return jsonify({
+        "success": True,
+        "students": rows,
+        "total_pending": total_pending
+    })
+
+
+@app.route("/api/fees/mark-pending", methods=["POST"])
+@login_required
+def mark_fee_pending():
+    data = request.json or {}
+    lead_id = data.get("lead_id")
+    amount = str(data.get("amount", "")).strip()
+    due_date = str(data.get("due_date", "")).strip()
+    remarks = str(data.get("remarks", "")).strip()
+
+    if not lead_id:
+        return jsonify({"error": "Lead ID is required"}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE leads
+            SET is_fee_pending = 1,
+                fee_pending_amount = ?,
+                fee_due_date = ?,
+                fee_remarks = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (amount, due_date, remarks, lead_id))
+        conn.commit()
+    bump_sync_version()
+    return jsonify({"success": True, "message": "Student marked for pending fees successfully!"})
+
+
+@app.route("/api/fees/mark-paid", methods=["POST"])
+@login_required
+def mark_fee_paid():
+    data = request.json or {}
+    lead_id = data.get("lead_id")
+    remarks = str(data.get("remarks", "Fee Paid")).strip()
+    user_id = session.get("user_id")
+
+    if not lead_id:
+        return jsonify({"error": "Lead ID is required"}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE leads
+            SET is_fee_pending = 0,
+                fee_remarks = ?,
+                last_caller_id = ?,
+                last_call_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (f"Paid: {remarks}", user_id, lead_id))
+
+        cursor.execute("""
+            INSERT INTO call_logs (lead_id, caller_id, status, remarks)
+            VALUES (?, ?, 'COMPLETED', ?)
+        """, (lead_id, user_id, f"Fee Paid marked: {remarks}"))
+        conn.commit()
+
+    bump_sync_version()
+    return jsonify({"success": True, "message": "Fee marked as paid successfully!"})
+
+
+@app.route("/api/fees/log-call", methods=["POST"])
+@login_required
+def log_fee_call():
+    data = request.json or {}
+    lead_id = data.get("lead_id")
+    status = data.get("status", "FEE_REMINDER").strip()
+    remarks = data.get("remarks", "").strip()
+    next_followup = data.get("next_followup_date", "")
+    user_id = session.get("user_id")
+
+    if not lead_id:
+        return jsonify({"error": "Lead ID is required"}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO call_logs (lead_id, caller_id, status, remarks, next_followup_date)
+            VALUES (?, ?, ?, ?, ?)
+        """, (lead_id, user_id, status, remarks, next_followup or None))
+
+        cursor.execute("""
+            UPDATE leads
+            SET last_caller_id = ?,
+                last_call_at = CURRENT_TIMESTAMP,
+                fee_remarks = ?,
+                next_followup_date = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (user_id, remarks, next_followup or None, lead_id))
+        conn.commit()
+
+    bump_sync_version()
+    return jsonify({"success": True, "message": "Fee call remarks saved!"})
+
+
+# -------------------------------------------------------------
+# CALL FOR EXAM (MONTHLY CALLING SYSTEM) APIS
+# -------------------------------------------------------------
+
+def get_current_exam_month():
+    today = date.today()
+    return today.strftime("%Y-%m"), today.strftime("%B %Y")
+
+
+@app.route("/api/exams/months", methods=["GET"])
+@login_required
+def get_exam_months():
+    is_admin = session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1
+    current_code, current_name = get_current_exam_month()
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM exam_month_settings WHERE month_code = ?", (current_code,))
+        if not cursor.fetchone():
+            cursor.execute("""
+                INSERT OR IGNORE INTO exam_month_settings (month_code, month_name, is_visible_to_staff, is_active)
+                VALUES (?, ?, 1, 1)
+            """, (current_code, current_name))
+            conn.commit()
+
+        if is_admin:
+            # Admin sees all months ever recorded (current & archive)
+            cursor.execute("""
+                SELECT s.month_code, s.month_name, s.is_visible_to_staff, s.is_active,
+                       (SELECT COUNT(*) FROM exam_students WHERE month_code = s.month_code) as total_students,
+                       (SELECT COUNT(*) FROM exam_students WHERE month_code = s.month_code AND call_status = 'CONFIRMED') as confirmed_count,
+                       (SELECT COUNT(*) FROM exam_students WHERE month_code = s.month_code AND call_status = 'NOT_CALLED') as not_called_count
+                FROM exam_month_settings s
+                ORDER BY s.month_code DESC
+            """ )
+            months = [dict(r) for r in cursor.fetchall()]
+            return jsonify({
+                "success": True,
+                "is_admin": True,
+                "current_month": current_code,
+                "months": months
+            })
+        else:
+            # Staff ONLY sees current month until the month ends, and only if visible
+            cursor.execute("""
+                SELECT month_code, month_name, is_visible_to_staff
+                FROM exam_month_settings
+                WHERE month_code = ?
+            """, (current_code,))
+            row = cursor.fetchone()
+            if not row or row["is_visible_to_staff"] == 0:
+                return jsonify({
+                    "success": True,
+                    "is_admin": False,
+                    "current_month": current_code,
+                    "visible": False,
+                    "message": "Exam calling list is currently hidden by Admin or not published."
+                })
+
+            cursor.execute("SELECT COUNT(*) as cnt FROM exam_students WHERE month_code = ?", (current_code,))
+            total = cursor.fetchone()["cnt"]
+            return jsonify({
+                "success": True,
+                "is_admin": False,
+                "current_month": current_code,
+                "visible": True,
+                "months": [{
+                    "month_code": current_code,
+                    "month_name": current_name,
+                    "is_visible_to_staff": 1,
+                    "total_students": total
+                }]
+            })
+
+
+@app.route("/api/exams/settings/visibility", methods=["POST"])
+@manager_required
+def toggle_exam_visibility():
+    data = request.json or {}
+    month_code = data.get("month_code", get_current_exam_month()[0])
+    is_visible = 1 if data.get("is_visible") else 0
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO exam_month_settings (month_code, month_name, is_visible_to_staff)
+            VALUES (?, ?, ?)
+            ON CONFLICT(month_code) DO UPDATE SET is_visible_to_staff = ?, updated_at = CURRENT_TIMESTAMP
+        """, (month_code, data.get("month_name", month_code), is_visible, is_visible))
+        conn.commit()
+    bump_sync_version()
+    status_text = "Visible to Staff" if is_visible else "Hidden from Staff"
+    return jsonify({"success": True, "is_visible": is_visible, "message": f"Exam calling list is now {status_text}!"})
+
+
+@app.route("/api/exams/students", methods=["GET"])
+@login_required
+def get_exam_students():
+    is_admin = session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1
+    current_code, _ = get_current_exam_month()
+
+    requested_month = request.args.get("month", current_code).strip()
+    status_filter = request.args.get("status", "").strip()
+    search = request.args.get("search", "").strip()
+
+    # Permission Enforcement: Staff can ONLY access current active month
+    if not is_admin:
+        if requested_month != current_code:
+            return jsonify({"error": "Staff can only view current month exams. Past exam archives are Admin-only."}), 403
+
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT is_visible_to_staff FROM exam_month_settings WHERE month_code = ?", (current_code,))
+            st = cursor.fetchone()
+            if not st or st["is_visible_to_staff"] == 0:
+                return jsonify({
+                    "success": True,
+                    "visible": False,
+                    "students": [],
+                    "message": "Exam calling list is currently hidden by Admin."
+                })
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM exam_students WHERE month_code = ?"
+        params = [requested_month]
+
+        if status_filter and status_filter != "ALL":
+            query += " AND call_status = ?"
+            params.append(status_filter)
+
+        if search:
+            query += """ AND (
+                student_name LIKE ? OR father_name LIKE ? OR phone LIKE ? OR 
+                alt_phone LIKE ? OR course LIKE ? OR batch LIKE ? OR learner_code LIKE ?
+            )"""
+            w = f"%{search}%"
+            params.extend([w, w, w, w, w, w, w])
+
+        query += """ ORDER BY 
+            CASE call_status 
+                WHEN 'NOT_CALLED' THEN 0 
+                WHEN 'CALL_BACK' THEN 1 
+                WHEN 'CONFIRMED' THEN 2
+                ELSE 3 
+            END ASC, student_name ASC"""
+        cursor.execute(query, params)
+        students = [dict(r) for r in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN call_status = 'NOT_CALLED' THEN 1 ELSE 0 END) as not_called,
+                SUM(CASE WHEN call_status = 'CONFIRMED' THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN call_status = 'ABSENT' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN call_status = 'CALL_BACK' THEN 1 ELSE 0 END) as call_back,
+                SUM(CASE WHEN call_status = 'FEE_ISSUE' THEN 1 ELSE 0 END) as fee_issue
+            FROM exam_students
+            WHERE month_code = ?
+        """, (requested_month,))
+        stats_row = cursor.fetchone()
+        stats = {
+            "total": stats_row["total"] or 0,
+            "not_called": stats_row["not_called"] or 0,
+            "confirmed": stats_row["confirmed"] or 0,
+            "absent": stats_row["absent"] or 0,
+            "call_back": stats_row["call_back"] or 0,
+            "fee_issue": stats_row["fee_issue"] or 0
+        }
+
+        cursor.execute("SELECT is_visible_to_staff FROM exam_month_settings WHERE month_code = ?", (requested_month,))
+        vis_row = cursor.fetchone()
+        is_visible_to_staff = vis_row["is_visible_to_staff"] if vis_row else 1
+
+    return jsonify({
+        "success": True,
+        "visible": True,
+        "month_code": requested_month,
+        "is_visible_to_staff": is_visible_to_staff,
+        "stats": stats,
+        "students": students
+    })
+
+
+@app.route("/api/exams/students/add", methods=["POST"])
+@manager_required
+def add_exam_student():
+    data = request.json or {}
+    month_code = data.get("month_code", get_current_exam_month()[0])
+    month_name = data.get("month_name", get_current_exam_month()[1])
+    student_name = data.get("student_name", "").strip()
+    father_name = data.get("father_name", "").strip()
+    phone = data.get("phone", "").strip()
+    alt_phone = data.get("alt_phone", "").strip()
+    course = data.get("course", "").strip()
+    batch = data.get("batch", "").strip()
+    learner_code = data.get("learner_code", "").strip()
+    exam_date_val = data.get("exam_date", "").strip()
+    student_id = data.get("student_id")
+    remarks = data.get("remarks", "").strip()
+
+    if not student_name or not phone:
+        return jsonify({"error": "Student Name and Phone Number are required."}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO exam_students 
+            (month_code, month_name, student_id, student_name, father_name, phone, alt_phone, course, batch, learner_code, exam_date, remarks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (month_code, month_name, student_id, student_name, father_name, phone, alt_phone, course, batch, learner_code, exam_date_val, remarks))
+        conn.commit()
+    bump_sync_version()
+    return jsonify({"success": True, "message": f"Student '{student_name}' added to {month_name} exam list!"})
+
+
+@app.route("/api/exams/students/add-from-leads", methods=["POST"])
+@manager_required
+def add_exam_student_from_leads():
+    data = request.json or {}
+    lead_id = data.get("lead_id")
+    month_code = data.get("month_code", get_current_exam_month()[0])
+    month_name = data.get("month_name", get_current_exam_month()[1])
+    exam_date_val = data.get("exam_date", "").strip()
+
+    if not lead_id:
+        return jsonify({"error": "Lead ID required"}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM leads WHERE id = ?", (lead_id,))
+        lead = cursor.fetchone()
+        if not lead:
+            return jsonify({"error": "Student not found"}), 404
+
+        cursor.execute("SELECT id FROM exam_students WHERE month_code = ? AND (student_id = ? OR phone = ?)", (month_code, lead_id, lead["phone"]))
+        if cursor.fetchone():
+            return jsonify({"error": f"Student '{lead['name']}' is already in {month_name} exam list!"}), 400
+
+        cursor.execute("""
+            INSERT INTO exam_students 
+            (month_code, month_name, student_id, student_name, father_name, phone, alt_phone, course, batch, learner_code, exam_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (month_code, month_name, lead_id, lead["name"], lead["father_name"], lead["phone"], lead["alt_phone"], lead["course"], lead["batch"], lead["learner_code"], exam_date_val))
+        conn.commit()
+    bump_sync_version()
+    return jsonify({"success": True, "message": f"'{lead['name']}' added to {month_name} exam list!"})
+
+
+@app.route("/api/exams/students/<int:student_id>/call", methods=["POST"])
+@login_required
+def log_exam_student_call(student_id):
+    data = request.json or {}
+    call_status = data.get("call_status", "").strip()
+    remarks = data.get("remarks", "").strip()
+    caller_name = session.get("name") or session.get("username") or "Staff"
+
+    valid_statuses = ["NOT_CALLED", "CONFIRMED", "ABSENT", "CALL_BACK", "FEE_ISSUE", "WRONG_NUMBER"]
+    if call_status not in valid_statuses:
+        return jsonify({"error": "Invalid call status"}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE exam_students
+            SET call_status = ?,
+                remarks = ?,
+                last_called_by = ?,
+                last_call_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (call_status, remarks, caller_name, student_id))
+        conn.commit()
+    bump_sync_version()
+    return jsonify({"success": True, "message": "Exam call status updated!"})
+
+
+@app.route("/api/exams/students/<int:student_id>", methods=["DELETE"])
+@manager_required
+def delete_exam_student(student_id):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM exam_students WHERE id = ?", (student_id,))
+        conn.commit()
+    bump_sync_version()
+    return jsonify({"success": True, "message": "Student removed from exam list."})
+
+
+@app.route("/api/exams/students/import", methods=["POST"])
+@manager_required
+def import_exam_students():
+    month_code = request.form.get("month_code", get_current_exam_month()[0])
+    month_name = request.form.get("month_name", get_current_exam_month()[1])
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
+    if not file or file.filename == "":
+        return jsonify({"error": "Empty file uploaded"}), 400
+
+    filename = file.filename.lower()
+    imported_count = 0
+    records = []
+
+    try:
+        if filename.endswith(".csv"):
+            stream = io.StringIO(file.stream.read().decode("utf-8", errors="ignore"))
+            reader = csv.reader(stream)
+            headers = [h.strip().lower() for h in next(reader, [])]
+            for row in reader:
+                if not row or not any(row):
+                    continue
+                row_dict = {headers[i]: row[i].strip() if i < len(row) else "" for i in range(len(headers))}
+                records.append(row_dict)
+        elif filename.endswith(".xlsx") or filename.endswith(".xls"):
+            import openpyxl
+            wb = openpyxl.load_workbook(file.stream, data_only=True)
+            sheet = wb.active
+            rows = list(sheet.iter_rows(values_only=True))
+            if rows:
+                headers = [str(h).strip().lower() if h is not None else "" for h in rows[0]]
+                for r in rows[1:]:
+                    if not r or not any(r):
+                        continue
+                    row_dict = {headers[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else "" for i in range(len(headers))}
+                    records.append(row_dict)
+
+        with get_db() as conn:
+            cursor = conn.cursor()
+            for r in records:
+                sname = r.get("name") or r.get("student name") or r.get("student") or r.get("learner name") or ""
+                fname = r.get("father name") or r.get("father's name") or r.get("father") or ""
+                phone = r.get("mobile") or r.get("phone") or r.get("contact") or r.get("mobile 1") or ""
+                alt = r.get("alt mobile") or r.get("alt phone") or r.get("mobile 2") or ""
+                course = r.get("course") or r.get("course name") or ""
+                batch = r.get("batch") or r.get("year") or ""
+                lcode = r.get("learner code") or r.get("roll no") or r.get("code") or ""
+                ex_date = r.get("exam date") or r.get("date") or ""
+
+                phone_clean = re.sub(r"[^0-9]", "", phone)[-10:]
+                if not sname or len(phone_clean) < 10:
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO exam_students 
+                    (month_code, month_name, student_name, father_name, phone, alt_phone, course, batch, learner_code, exam_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (month_code, month_name, sname, fname, phone_clean, alt, course, batch, lcode, ex_date))
+                imported_count += 1
+            conn.commit()
+
+        bump_sync_version()
+        return jsonify({"success": True, "message": f"Successfully imported {imported_count} exam students for {month_name}!"})
+    except Exception as e:
+        return jsonify({"error": f"Import failed: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
