@@ -238,6 +238,8 @@ def init_db():
         u_columns = [row[1] for row in cursor.fetchall()]
         if "permissions" not in u_columns:
             cursor.execute("ALTER TABLE users ADD COLUMN permissions TEXT DEFAULT ''")
+        if "theme_preference" not in u_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN theme_preference TEXT DEFAULT 'light'")
 
         # Default Users: Arsh (Manager) and staff
         cursor.execute("SELECT id FROM users WHERE username = 'arsh'")
@@ -436,6 +438,8 @@ def login():
         session["permissions"] = user_perms
         is_super = (user["username"] == "arsh" or user["id"] == 1)
         session["is_super_admin"] = is_super
+        theme_pref = user["theme_preference"] if ("theme_preference" in user.keys() and user["theme_preference"]) else "light"
+        session["theme_preference"] = theme_pref
 
         return jsonify({
             "message": "Login successful",
@@ -445,7 +449,8 @@ def login():
                 "username": user["username"],
                 "role": user["role"],
                 "is_super_admin": is_super,
-                "permissions": user_perms
+                "permissions": user_perms,
+                "theme_preference": theme_pref
             }
         })
 
@@ -464,7 +469,12 @@ def me():
     user_id = session.get("user_id")
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, name, username, role, is_active, permissions FROM users WHERE id = ?", (user_id,))
+        cursor.execute("PRAGMA table_info(users)")
+        u_cols = [r[1] for r in cursor.fetchall()]
+        if "theme_preference" not in u_cols:
+            cursor.execute("ALTER TABLE users ADD COLUMN theme_preference TEXT DEFAULT 'light'")
+            conn.commit()
+        cursor.execute("SELECT id, name, username, role, is_active, permissions, theme_preference FROM users WHERE id = ?", (user_id,))
         u = cursor.fetchone()
         if not u or not u["is_active"]:
             session.clear()
@@ -477,6 +487,8 @@ def me():
         session["permissions"] = perms
         is_super = (u["username"] == "arsh" or u["id"] == 1)
         session["is_super_admin"] = is_super
+        theme_pref = u["theme_preference"] if ("theme_preference" in u.keys() and u["theme_preference"]) else "light"
+        session["theme_preference"] = theme_pref
 
         return jsonify({
             "authenticated": True,
@@ -486,9 +498,30 @@ def me():
                 "username": u["username"],
                 "role": u["role"],
                 "is_super_admin": is_super,
-                "permissions": perms
+                "permissions": perms,
+                "theme_preference": theme_pref
             }
         })
+
+
+@app.route("/api/me/theme", methods=["POST"])
+@login_required
+def update_user_theme():
+    data = request.json or {}
+    theme = str(data.get("theme", "light")).strip().lower()
+    if theme not in ["light", "dark"]:
+        theme = "light"
+    user_id = session.get("user_id")
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(users)")
+        u_cols = [r[1] for r in cursor.fetchall()]
+        if "theme_preference" not in u_cols:
+            cursor.execute("ALTER TABLE users ADD COLUMN theme_preference TEXT DEFAULT 'light'")
+        cursor.execute("UPDATE users SET theme_preference = ? WHERE id = ?", (theme, user_id))
+        conn.commit()
+    session["theme_preference"] = theme
+    return jsonify({"success": True, "theme": theme})
 
 
 @app.route("/api/sync/version", methods=["GET"])
@@ -1973,6 +2006,9 @@ def get_fees_students():
 @app.route("/api/fees/mark-pending", methods=["POST"])
 @login_required
 def mark_fee_pending():
+    if session.get("role") != "manager" and not session.get("is_super_admin"):
+        return jsonify({"error": "Only Manager can assign or edit pending fees."}), 403
+
     data = request.json or {}
     lead_id = data.get("lead_id")
     amount = str(data.get("amount", "")).strip()
@@ -2001,6 +2037,9 @@ def mark_fee_pending():
 @app.route("/api/fees/mark-paid", methods=["POST"])
 @login_required
 def mark_fee_paid():
+    if session.get("role") != "manager" and not session.get("is_super_admin"):
+        return jsonify({"error": "Only Manager can mark fees as paid."}), 403
+
     data = request.json or {}
     lead_id = data.get("lead_id")
     remarks = str(data.get("remarks", "Fee Paid")).strip()
