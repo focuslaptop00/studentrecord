@@ -4,16 +4,173 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Focus Institute - Student Calling CRM</title>
+
+  <!-- IMMEDIATE THEME INITIALIZATION (Zero flicker on page load) -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('focus_theme_preference') || 'light';
+        if (saved === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch(e) {}
+    })();
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            darkBg: '#0b0f19',
+            darkCard: '#131c2e',
+            darkBorder: '#243049',
+          }
+        }
+      }
+    };
+  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.2s ease, color 0.2s ease; }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+
+    /* ==============================================================
+       COMPLETE MODERN DARK THEME STYLING
+       ============================================================== */
+    .dark body {
+      background-color: #0b0f19 !important;
+      color: #f1f5f9 !important;
+    }
+    .dark header {
+      background-color: #0d1527 !important;
+      border-bottom: 1px solid #1e293b !important;
+    }
+    .dark .bg-white {
+      background-color: #131c2e !important;
+      border-color: #243049 !important;
+    }
+    .dark .bg-slate-50,
+    .dark .bg-slate-50\/50,
+    .dark .bg-slate-50\/80 {
+      background-color: #0f172a !important;
+    }
+    .dark .bg-slate-100 {
+      background-color: #1a253c !important;
+      color: #cbd5e1 !important;
+    }
+    .dark .bg-slate-200 {
+      background-color: #243049 !important;
+    }
+    .dark .text-slate-900,
+    .dark .text-slate-800 {
+      color: #f8fafc !important;
+    }
+    .dark .text-slate-700,
+    .dark .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+    .dark .text-slate-500,
+    .dark .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+    .dark .border-slate-100,
+    .dark .border-slate-200,
+    .dark .border-slate-200\/90,
+    .dark .border-slate-200\/80 {
+      border-color: #243049 !important;
+    }
+    .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+    .dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+      border-color: #243049 !important;
+    }
+    .dark tr:hover {
+      background-color: #182338 !important;
+    }
+    .dark input,
+    .dark select,
+    .dark textarea {
+      background-color: #0b0f19 !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    .dark input:focus,
+    .dark select:focus,
+    .dark textarea:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+    }
+    .dark input::placeholder,
+    .dark textarea::placeholder {
+      color: #64748b !important;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155 !important;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0b0f19 !important;
+    }
+
+    /* Modals in Dark Mode */
+    .dark .fixed > div > div {
+      background-color: #131c2e !important;
+      border-color: #243049 !important;
+      color: #f8fafc !important;
+    }
+    .dark .fixed input,
+    .dark .fixed select,
+    .dark .fixed textarea {
+      background-color: #0b0f19 !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+
+    /* Badges & Indicators in Dark Mode */
+    .dark .bg-amber-50,
+    .dark .bg-amber-100 {
+      background-color: rgba(245, 158, 11, 0.18) !important;
+      color: #fde68a !important;
+      border-color: rgba(245, 158, 11, 0.35) !important;
+    }
+    .dark .bg-emerald-50,
+    .dark .bg-emerald-100 {
+      background-color: rgba(16, 185, 129, 0.18) !important;
+      color: #a7f3d0 !important;
+      border-color: rgba(16, 185, 129, 0.35) !important;
+    }
+    .dark .bg-rose-50,
+    .dark .bg-rose-100 {
+      background-color: rgba(244, 63, 94, 0.18) !important;
+      color: #fecdd3 !important;
+      border-color: rgba(244, 63, 94, 0.35) !important;
+    }
+    .dark .bg-indigo-50,
+    .dark .bg-indigo-100 {
+      background-color: rgba(99, 102, 241, 0.18) !important;
+      color: #c7d2fe !important;
+      border-color: rgba(99, 102, 241, 0.35) !important;
+    }
+    .dark .bg-sky-50,
+    .dark .bg-sky-100 {
+      background-color: rgba(14, 165, 233, 0.18) !important;
+      color: #bae6fd !important;
+      border-color: rgba(14, 165, 233, 0.35) !important;
+    }
+    .dark .bg-purple-50,
+    .dark .bg-purple-100 {
+      background-color: rgba(168, 85, 247, 0.18) !important;
+      color: #e9d5ff !important;
+      border-color: rgba(168, 85, 247, 0.35) !important;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen antialiased flex flex-col">
@@ -30,19 +187,35 @@
         </div>
       </div>
 
-      <div id="authNav" class="hidden items-center space-x-3">
-        <button id="adminProfileBtn" onclick="openAdminProfileModal()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-900/90 hover:bg-indigo-800 text-xs font-bold border border-indigo-700/60 transition shadow-xs">
-          <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-300"></i>
-          <span>Passwords</span>
-        </button>
-        <div class="text-right hidden sm:block">
-          <div class="text-sm font-semibold" id="navUserName">Arsh</div>
-          <div class="text-xs text-indigo-300 capitalize" id="navUserRole">Manager</div>
+      <!-- RIGHT HEADER ACTIONS -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        
+        <!-- THEME SWITCHER (Light / Dark with Permanent Default Remember) -->
+        <div class="flex items-center bg-indigo-900/80 p-0.5 sm:p-1 rounded-2xl border border-indigo-700/60 shadow-xs" title="Switch Theme (Light / Dark Mode)">
+          <button id="themeLightBtn" onclick="setTheme('light')" class="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition text-slate-300 hover:text-white" title="Light Theme (Click to set as default)">
+            <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-300"></i>
+            <span class="hidden sm:inline text-[11px]">Light</span>
+          </button>
+          <button id="themeDarkBtn" onclick="setTheme('dark')" class="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition text-indigo-200 hover:text-white" title="Dark Theme (Click to set as default)">
+            <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-300"></i>
+            <span class="hidden sm:inline text-[11px]">Dark</span>
+          </button>
         </div>
-        <button onclick="logout()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-rose-600 text-xs font-semibold transition">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-          <span>Logout</span>
-        </button>
+
+        <div id="authNav" class="hidden items-center space-x-2 sm:space-x-3">
+          <button id="adminProfileBtn" onclick="openAdminProfileModal()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-900/90 hover:bg-indigo-800 text-xs font-bold border border-indigo-700/60 transition shadow-xs">
+            <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-300"></i>
+            <span>Passwords</span>
+          </button>
+          <div class="text-right hidden sm:block">
+            <div class="text-sm font-semibold" id="navUserName">Arsh</div>
+            <div class="text-xs text-indigo-300 capitalize" id="navUserRole">Manager</div>
+          </div>
+          <button onclick="logout()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-rose-600 text-xs font-semibold transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -2153,6 +2326,53 @@
 
   <!-- APPLICATION JAVASCRIPT LOGIC -->
   <script>
+    // ==========================================
+    // THEME SWITCHER & PERMANENT DEFAULT ENGINE
+    // ==========================================
+    function getSavedTheme() {
+      return localStorage.getItem('focus_theme_preference') || 'light';
+    }
+
+    function updateThemeUI(theme) {
+      const lightBtn = document.getElementById('themeLightBtn');
+      const darkBtn = document.getElementById('themeDarkBtn');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        if (darkBtn) {
+          darkBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black transition bg-indigo-600 text-white shadow-xs';
+        }
+        if (lightBtn) {
+          lightBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold transition text-indigo-200 hover:text-white';
+        }
+      } else {
+        document.documentElement.classList.remove('dark');
+        if (lightBtn) {
+          lightBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black transition bg-amber-400 text-indigo-950 shadow-xs';
+        }
+        if (darkBtn) {
+          darkBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold transition text-indigo-200 hover:text-white';
+        }
+      }
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function setTheme(theme, saveAsDefault = true) {
+      updateThemeUI(theme);
+      if (saveAsDefault) {
+        localStorage.setItem('focus_theme_preference', theme);
+        if (currentUser && currentUser.id) {
+          fetch('/api/me/theme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ theme: theme })
+          }).catch(e => console.log('Theme sync error:', e));
+        }
+        showToast(`Theme changed to ${theme.toUpperCase()} (Saved as default)`);
+      }
+    }
+
     let currentUser = null;
     let managerLeads = [];
     let managerEnquiries = [];
@@ -2270,6 +2490,14 @@
         const data = await res.json();
         if (data.authenticated) {
           currentUser = data.user;
+          if (currentUser && currentUser.theme_preference) {
+            const localTheme = localStorage.getItem('focus_theme_preference');
+            if (!localTheme) {
+              setTheme(currentUser.theme_preference, false);
+            } else {
+              updateThemeUI(localTheme);
+            }
+          }
           setupAuthenticatedView();
         } else {
           showLoginScreen();
@@ -2315,6 +2543,14 @@
         }
 
         currentUser = data.user;
+        if (currentUser && currentUser.theme_preference) {
+          const localTheme = localStorage.getItem('focus_theme_preference');
+          if (!localTheme) {
+            setTheme(currentUser.theme_preference, false);
+          } else {
+            updateThemeUI(localTheme);
+          }
+        }
         setupAuthenticatedView();
         showToast(`Welcome, ${currentUser.name}!`);
       } catch (err) {
@@ -4572,6 +4808,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      updateThemeUI(getSavedTheme());
       checkAuth();
     });
   
@@ -4636,13 +4873,27 @@
     }
 
     function renderFeesStudents() {
-      const isMgr = currentUser && (currentUser.role === 'manager' || (currentUser.permissions && currentUser.permissions.can_edit));
-      const tbody = document.getElementById(isMgr ? 'mFeesTableBody' : 'sFeesTableBody');
-      const emptyState = document.getElementById(isMgr ? 'mFeesEmptyState' : 'sFeesEmptyState');
-      if (!tbody) return;
+      const isRealManager = currentUser && currentUser.role === 'manager';
 
+      // 1. Render Manager Table (if present and user is manager)
+      const mBody = document.getElementById('mFeesTableBody');
+      const mEmpty = document.getElementById('mFeesEmptyState');
+      if (mBody && isRealManager) {
+        renderFeesRowsInto(mBody, mEmpty, true, 'mFeeSearchInput');
+      }
+
+      // 2. Render Staff Table (for Staff, Madam Savita, or staff view)
+      const sBody = document.getElementById('sFeesTableBody');
+      const sEmpty = document.getElementById('sFeesEmptyState');
+      if (sBody) {
+        renderFeesRowsInto(sBody, sEmpty, false, 'sFeeSearchInput');
+      }
+    }
+
+    function renderFeesRowsInto(tbody, emptyState, isManagerMode, searchInputId) {
+      if (!tbody) return;
       tbody.innerHTML = '';
-      const search = (document.getElementById(isMgr ? 'mFeeSearchInput' : 'sFeeSearchInput')?.value || '').toLowerCase().trim();
+      const search = (document.getElementById(searchInputId)?.value || '').toLowerCase().trim();
 
       let filtered = feesStudentsList;
       if (search) {
@@ -4663,7 +4914,7 @@
 
       const todayStr = new Date().toISOString().split('T')[0];
 
-      filtered.forEach((s, idx) => {
+      filtered.forEach((s) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition';
 
@@ -4681,6 +4932,36 @@
         const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
         const waLink = `https://wa.me/91${phoneClean}`;
         const telLink = `tel:${phoneClean}`;
+
+        let actionHtml = '';
+        if (isManagerMode) {
+          // Manager actions: Call Log, Paid, Edit
+          actionHtml = `
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Log Call Outcome">
+                <i data-lucide="phone-call" class="w-3 h-3"></i>
+                <span>Call Log</span>
+              </button>
+              <button onclick="handleMarkFeePaid(${s.id}, '${escapeHtml(s.name)}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Mark Fee Paid">
+                <i data-lucide="check" class="w-3 h-3"></i>
+                <span>Paid</span>
+              </button>
+              <button onclick="openMarkFeePendingModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Edit Fee Amount/Date">
+                <i data-lucide="edit-3" class="w-3 h-3"></i>
+              </button>
+            </div>
+          `;
+        } else {
+          // Staff calling view: PURE CALLING ACTION ONLY (NO paid button, NO edit button)
+          actionHtml = `
+            <div class="flex items-center justify-end">
+              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition text-xs flex items-center gap-1.5 shadow-xs" title="Call student and record remark">
+                <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+                <span>Call / Add Remark</span>
+              </button>
+            </div>
+          `;
+        }
 
         tr.innerHTML = `
           <td class="py-3 px-4">
@@ -4714,21 +4995,7 @@
             ${s.last_caller_name ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${s.last_caller_name}</div>` : ''}
           </td>
           <td class="py-3 px-4 text-right">
-            <div class="flex items-center justify-end gap-1.5">
-              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs">
-                <i data-lucide="phone-call" class="w-3 h-3"></i>
-                <span>Call Log</span>
-              </button>
-              ${isMgr ? `
-                <button onclick="handleMarkFeePaid(${s.id}, '${escapeHtml(s.name)}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Mark Fee Paid">
-                  <i data-lucide="check" class="w-3 h-3"></i>
-                  <span>Paid</span>
-                </button>
-                <button onclick="openMarkFeePendingModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Edit Fee Amount/Date">
-                  <i data-lucide="edit-3" class="w-3 h-3"></i>
-                </button>
-              ` : ''}
-            </div>
+            ${actionHtml}
           </td>
         `;
         tbody.appendChild(tr);
@@ -4809,6 +5076,45 @@
       document.getElementById('logFeeStudentName').innerText = studentName;
       document.getElementById('logFeePhone').innerText = phone;
       document.getElementById('logFeeAmount').innerText = amount || 'Pending';
+      document.getElementById('logFeeRemarks').value = '';
+      document.getElementById('logFeeFollowupDate').value = '';
+
+      const isRealManager = currentUser && currentUser.role === 'manager';
+      const statusSelect = document.getElementById('logFeeCallStatus');
+      if (statusSelect) {
+        if (isRealManager) {
+          statusSelect.innerHTML = `
+            <option value="FEE_REMINDER">📞 Call Done - Follow-up Needed</option>
+            <option value="PROMISED_DATE">🤝 Promised to Pay on Date</option>
+            <option value="PAID">✅ Fee Paid / Collected (Clear Pending)</option>
+            <option value="RINGING">🔔 Ringing / No Answer</option>
+            <option value="SWITCHED_OFF">📴 Switched Off / Not Reachable</option>
+            <option value="CALL_LATER">🔄 Asked to Call Later</option>
+            <option value="DISPUTE">⚠️ Fee Dispute / Query</option>
+          `;
+        } else {
+          // Staff calling view: PURE CALLING OUTCOMES ONLY (No Paid option)
+          statusSelect.innerHTML = `
+            <option value="PROMISED_DATE">🤝 Promised to Pay on Date</option>
+            <option value="FEE_REMINDER">📞 Call Done - Spoke with Student/Parent</option>
+            <option value="RINGING">🔔 Ringing / No Answer</option>
+            <option value="SWITCHED_OFF">📴 Switched Off / Not Reachable</option>
+            <option value="CALL_LATER">🔄 Asked to Call Later</option>
+            <option value="DISPUTE">⚠️ Fee Dispute / Query</option>
+          `;
+        }
+      }
+
+      const titleEl = document.getElementById('logFeeModalTitle');
+      const subEl = document.getElementById('logFeeModalSub');
+      if (!isRealManager) {
+        if (titleEl) titleEl.innerText = 'Call Student & Record Remark';
+        if (subEl) subEl.innerText = 'Call student regarding pending fee and save calling outcome.';
+      } else {
+        if (titleEl) titleEl.innerText = 'Fee Calling Remarks';
+        if (subEl) subEl.innerText = 'Record call outcome & payment promise';
+      }
+
       openModal('logFeeCallModal');
     }
 
