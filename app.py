@@ -270,6 +270,73 @@ def init_db():
             default_api_key = "focus_live_" + secrets.token_hex(12)
             cursor.execute("INSERT INTO settings (key, value) VALUES ('webhook_api_key', ?)", (default_api_key,))
 
+        # One-time seed for November 2026 Exam Calling Sheet (26 students, 25-28 Nov 2026)
+        cursor.execute("SELECT value FROM settings WHERE key = 'seed_nov2026_exam_sheet_v1'")
+        if not cursor.fetchone():
+            cursor.execute("""
+                DELETE FROM exam_students
+                WHERE month_code = '2026-11'
+                  AND remarks = 'November Monthly Final Exam'
+                  AND student_name IN ('BHAWNA', 'YOGITA', 'NAVJOT KAUR')
+            """)
+            cursor.execute("""
+                INSERT OR IGNORE INTO exam_month_settings
+                (month_code, month_name, exam_start_date, exam_end_date, is_visible_to_staff, is_active)
+                VALUES ('2026-11', 'November 2026', '2026-11-25', '2026-11-28', 1, 1)
+            """)
+            nov_sheet_students = [
+                ("3773007226013123", "REKHA KAUR", "9050010938", "7988558013", "HS-CIT"),
+                ("3782460226063023", "VIKRAMJEET SINGH", "9780982809", "7700000606", "HS-CIT"),
+                ("3783777026073123", "MEENAKSHI", "7206691536", "9356530299", "HS-CIT"),
+                ("3784532226090923", "KARANVEER SINGH", "8168000341", "9729691485", "HS-CIT"),
+                ("3785436026091623", "SUMIT", "7497062429", "7707954349", "HS-CIT"),
+                ("3786202826091623", "ANANYA", "8307493596", "", "HS-CIT"),
+                ("3786584126091623", "ARSHDEEP KAUR", "9996447708", "9034288529", "HS-CIT"),
+                ("3787017926093023", "AJAY", "7497088610", "9812350610", "HS-CIT"),
+                ("3787019026093023", "RAVI", "8930523119", "9812047203", "HS-CIT"),
+                ("2770021818121323", "ARSHDEEP KAUR", "7988624114", "9729820514", "HS-CIT ( A )"),
+                ("3271535022103185", "SACHIN", "9817958435", "", "HS-CIT ( A )"),
+                ("3665482525033123", "MANDEEP KAUR", "7496870362", "9896870362", "HS-CIT ( A )"),
+                ("3745981025081423", "FATEH SINGH", "9416754205", "8295320523", "HS-CIT ( A )"),
+                ("3758953825102323", "SUNIL KUMAR", "8818087477", "", "HS-CIT ( A )"),
+                ("3770260325120923", "LOVEPREET SINGH", "7206978796", "", "HS-CIT ( A )"),
+                ("3772920626013123", "PRINCE GOSWAMI", "9335031812", "8172945710", "HS-CIT ( A )"),
+                ("3774148426030523", "KHUSHMEET KAUR", "9988570167", "9530719014", "HS-CIT ( A )"),
+                ("3774174626030723", "RIDHIMA", "7404977148", "8307477148", "HS-CIT ( A )"),
+                ("3774392326033123", "PALAK", "8307268176", "9466001563", "HS-CIT ( A )"),
+                ("3774404126033123", "HARMANDEEP KAUR", "7015371409", "9466001627", "HS-CIT ( A )"),
+                ("3776185326033123", "ALISHA", "7404949618", "8307209055", "HS-CIT ( A )"),
+                ("3776325126041723", "PRIYANKA RANI", "8295684970", "9728784970", "HS-CIT ( A )"),
+                ("3777946526042723", "YASHU", "9466375706", "9306632509", "HS-CIT ( A )"),
+                ("3780157626052823", "TARUN KUMAR", "9306557947", "7082457947", "HS-CIT ( A )"),
+                ("3780157926052823", "VANSHDEEP", "9306557947", "7082457947", "HS-CIT ( A )"),
+                ("3781201926052823", "POOJA DEVI", "9991669475", "9996843190", "HS-CIT ( A )"),
+            ]
+            for lc, sname, ph, alt_ph, exam_course in nov_sheet_students:
+                cursor.execute(
+                    "SELECT id FROM exam_students WHERE month_code = '2026-11' AND learner_code = ?",
+                    (lc,)
+                )
+                if cursor.fetchone():
+                    continue
+                cursor.execute(
+                    "SELECT id, father_name, batch FROM leads WHERE learner_code = ? ORDER BY id DESC LIMIT 1",
+                    (lc,)
+                )
+                lead_row = cursor.fetchone()
+                st_id = lead_row["id"] if lead_row else None
+                f_name = lead_row["father_name"] if lead_row and lead_row["father_name"] else ""
+                b_name = lead_row["batch"] if lead_row and lead_row["batch"] else ""
+                cursor.execute("""
+                    INSERT INTO exam_students
+                    (month_code, month_name, student_id, student_name, father_name, phone, alt_phone, course, batch, learner_code, exam_date, exam_start_date, exam_end_date, call_status, remarks)
+                    VALUES ('2026-11', 'November 2026', ?, ?, ?, ?, ?, ?, ?, ?, '2026-11-25 to 2026-11-28', '2026-11-25', '2026-11-28', 'NOT_CALLED', '')
+                """, (st_id, sname, f_name, ph, alt_ph, exam_course, b_name, lc))
+
+            cursor.execute(
+                "INSERT OR REPLACE INTO settings (key, value) VALUES ('seed_nov2026_exam_sheet_v1', 'done')"
+            )
+
         # Auto-migration for users table permissions
         cursor.execute("PRAGMA table_info(users)")
         u_columns = [row[1] for row in cursor.fetchall()]
@@ -932,6 +999,8 @@ def staff_get_lead_detail(lead_id):
 @app.route("/api/staff/lead/<int:lead_id>/call", methods=["POST"])
 @login_required
 def staff_log_call(lead_id):
+    if session.get("username") == "savita":
+        return jsonify({"error": "Owner preview account is view-only."}), 403
     user_id = session["user_id"]
     data = request.json or {}
     status = data.get("status", "").strip()
@@ -1059,12 +1128,12 @@ def compute_staff_performance(cursor, today_str=None):
     cursor.execute("""
         SELECT u.id, u.name, u.phone, u.is_active,
                (
-                   SELECT COUNT(*) FROM call_logs cl
-                   WHERE cl.caller_id = u.id AND DATE(cl.created_at) = ?
+                   (SELECT COUNT(*) FROM call_logs cl WHERE cl.caller_id = u.id AND DATE(cl.created_at) = ?) +
+                   (SELECT COUNT(*) FROM exam_students es WHERE es.last_called_by IN (u.name, u.username) AND DATE(es.last_call_at) = ?)
                ) as calls_today,
                (
-                   SELECT COUNT(*) FROM call_logs cl
-                   WHERE cl.caller_id = u.id
+                   (SELECT COUNT(*) FROM call_logs cl WHERE cl.caller_id = u.id) +
+                   (SELECT COUNT(*) FROM exam_students es WHERE es.last_called_by IN (u.name, u.username))
                ) as total_calls,
                (
                    SELECT MAX(cl.created_at) FROM call_logs cl
@@ -1085,7 +1154,7 @@ def compute_staff_performance(cursor, today_str=None):
         FROM users u
         WHERE u.role = 'staff' AND LOWER(COALESCE(u.username, '')) != 'savita'
         ORDER BY u.id ASC
-    """, (today_str,))
+    """, (today_str, today_str))
 
     staff_list = []
     for r in cursor.fetchall():
@@ -1107,10 +1176,8 @@ def owner_staff_activity():
     with get_db() as conn:
         cursor = conn.cursor()
         staff_list = compute_staff_performance(cursor, today_str)
-        cursor.execute("SELECT COUNT(*) FROM call_logs WHERE DATE(created_at) = ?", (today_str,))
-        calls_today = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM call_logs")
-        total_calls = cursor.fetchone()[0]
+        calls_today = sum((s.get("calls_today") or 0) for s in staff_list)
+        total_calls = sum((s.get("total_calls") or 0) for s in staff_list)
 
     return jsonify({
         "success": True,
@@ -1151,7 +1218,9 @@ def manager_stats():
         total_trash = cursor.fetchone()[0]
 
         cursor.execute("SELECT COUNT(*) FROM call_logs WHERE DATE(created_at) = ?", (today_str,))
-        calls_today = cursor.fetchone()[0]
+        lead_calls_today = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM exam_students WHERE DATE(last_call_at) = ?", (today_str,))
+        calls_today = lead_calls_today + cursor.fetchone()[0]
 
         cursor.execute("SELECT COUNT(*) FROM leads WHERE status = 'FOLLOW_UP' AND DATE(next_followup_date) <= ? AND (is_deleted = 0 OR is_deleted IS NULL)", (today_str,))
         pending_followups = cursor.fetchone()[0]
@@ -1790,6 +1859,8 @@ def staff_get_enquiries():
 @app.route("/api/staff/enquiries", methods=["POST"])
 @login_required
 def staff_create_enquiry():
+    if session.get("username") == "savita":
+        return jsonify({"error": "Owner preview account is view-only."}), 403
     user_id = session["user_id"]
     data = request.json or {}
     name = data.get("name", "").strip()
@@ -1822,6 +1893,8 @@ def staff_create_enquiry():
 @app.route("/api/enquiries/<int:enquiry_id>/status", methods=["POST"])
 @login_required
 def update_enquiry_status(enquiry_id):
+    if session.get("username") == "savita":
+        return jsonify({"error": "Owner preview account is view-only."}), 403
     user_id = session["user_id"]
     is_manager = session.get("role") == "manager"
     data = request.json or {}
@@ -2495,7 +2568,7 @@ def get_exam_students():
                 WHEN 'CALL_BACK' THEN 1 
                 WHEN 'CONFIRMED' THEN 2
                 ELSE 3 
-            END ASC, student_name ASC"""
+            END ASC, id ASC"""
         cursor.execute(query, params)
         students = []
         for r in cursor.fetchall():
@@ -2701,6 +2774,8 @@ def add_exam_student_from_leads():
 @app.route("/api/exams/students/<int:student_id>/call", methods=["POST"])
 @login_required
 def log_exam_student_call(student_id):
+    if session.get("username") == "savita":
+        return jsonify({"error": "Owner preview account is view-only."}), 403
     data = request.json or {}
     call_status = data.get("call_status", "").strip()
     remarks = data.get("remarks", "").strip()
@@ -2760,6 +2835,22 @@ def import_exam_students():
     imported_count = 0
     records = []
 
+    def build_row_record(headers_list, row_values):
+        rec = {}
+        phone_cols = []
+        for idx, h in enumerate(headers_list):
+            if not h:
+                continue
+            raw_v = row_values[idx] if idx < len(row_values) and row_values[idx] is not None else ""
+            val = str(raw_v).strip()
+            if h in ("phone number", "phone", "mobile", "contact", "mobile number"):
+                if val:
+                    phone_cols.append(val)
+            elif h not in rec or not rec[h]:
+                rec[h] = val
+        rec["_phones"] = phone_cols
+        return rec
+
     try:
         if filename.endswith(".csv"):
             stream = io.StringIO(file.stream.read().decode("utf-8", errors="ignore"))
@@ -2768,8 +2859,7 @@ def import_exam_students():
             for row in reader:
                 if not row or not any(row):
                     continue
-                row_dict = {headers[i]: row[i].strip() if i < len(row) else "" for i in range(len(headers))}
-                records.append(row_dict)
+                records.append(build_row_record(headers, row))
         elif filename.endswith(".xlsx") or filename.endswith(".xls"):
             import openpyxl
             wb = openpyxl.load_workbook(file.stream, data_only=True)
@@ -2780,8 +2870,7 @@ def import_exam_students():
                 for r in rows[1:]:
                     if not r or not any(r):
                         continue
-                    row_dict = {headers[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else "" for i in range(len(headers))}
-                    records.append(row_dict)
+                    records.append(build_row_record(headers, r))
 
         with get_db() as conn:
             cursor = conn.cursor()
@@ -2790,9 +2879,10 @@ def import_exam_students():
             for r in records:
                 sname = r.get("name") or r.get("student name") or r.get("student") or r.get("learner name") or ""
                 fname = r.get("father name") or r.get("father's name") or r.get("father") or ""
-                phone = r.get("mobile") or r.get("phone") or r.get("contact") or r.get("mobile 1") or ""
-                alt = r.get("alt mobile") or r.get("alt phone") or r.get("mobile 2") or ""
-                course = r.get("course") or r.get("course name") or ""
+                phones = r.get("_phones") or []
+                phone = r.get("mobile 1") or r.get("phone 1") or (phones[0] if len(phones) > 0 else "")
+                alt = r.get("alt mobile") or r.get("alt phone") or r.get("mobile 2") or r.get("phone 2") or (phones[1] if len(phones) > 1 else "")
+                course = r.get("course") or r.get("course name") or r.get("exam") or ""
                 batch = r.get("batch") or r.get("year") or ""
                 lcode = r.get("learner code") or r.get("roll no") or r.get("code") or ""
                 row_start = r.get("exam start date") or r.get("start date") or r.get("from date") or default_start
@@ -2804,6 +2894,7 @@ def import_exam_students():
                     continue
 
                 phone_clean = re.sub(r"[^0-9]", "", phone)[-10:]
+                alt_clean = re.sub(r"[^0-9]", "", alt)[-10:] if alt else ""
                 if not sname or len(phone_clean) < 10:
                     continue
 
@@ -2811,7 +2902,7 @@ def import_exam_students():
                     INSERT INTO exam_students 
                     (month_code, month_name, student_name, father_name, phone, alt_phone, course, batch, learner_code, exam_date, exam_start_date, exam_end_date)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (month_code, month_name, sname, fname, phone_clean, alt, course, batch, lcode, comb_dt, s_dt, e_dt))
+                """, (month_code, month_name, sname, fname, phone_clean, alt_clean, course, batch, lcode, comb_dt, s_dt, e_dt))
                 imported_count += 1
             conn.commit()
 
