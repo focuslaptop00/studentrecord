@@ -980,6 +980,10 @@ def staff_stats():
         cursor.execute("SELECT COUNT(*) FROM leads WHERE (record_type = 'admitted' OR record_type IS NULL) AND (is_deleted = 0 OR is_deleted IS NULL) AND is_fee_pending = 1")
         total_fees_pending = cursor.fetchone()[0]
 
+        # All active institute enquiries count
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE record_type = 'enquiry' AND (is_deleted = 0 OR is_deleted IS NULL)")
+        total_enquiries = cursor.fetchone()[0]
+
         # Current Month Exam Calling info
         curr_m_code = date.today().strftime("%Y-%m")
         cursor.execute("SELECT is_visible_to_staff FROM exam_month_settings WHERE month_code = ?", (curr_m_code,))
@@ -992,6 +996,7 @@ def staff_stats():
         return jsonify({
             "total_leads": total_shared_leads,
             "total_admitted_leads": total_shared_leads,
+            "total_enquiries": total_enquiries,
             "my_enquiries_total": my_enquiries_total,
             "my_admissions_done": my_admissions_done,
             "my_cancelled": my_cancelled,
