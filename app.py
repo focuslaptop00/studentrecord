@@ -196,13 +196,6 @@ def init_db():
             cursor.execute("ALTER TABLE exam_students ADD COLUMN exam_start_date TEXT")
         if "exam_end_date" not in exam_cols:
             cursor.execute("ALTER TABLE exam_students ADD COLUMN exam_end_date TEXT")
-        cursor.execute("""
-            UPDATE exam_students
-            SET exam_start_date = exam_date
-            WHERE (exam_start_date IS NULL OR exam_start_date = '')
-              AND exam_date IS NOT NULL AND exam_date != ''
-              AND exam_date NOT LIKE '% to %'
-        """)
 
         # Exam Month Settings Table (for admin visibility toggle & monthly archive)
         cursor.execute("""
@@ -224,10 +217,29 @@ def init_db():
         if "exam_end_date" not in exam_month_cols:
             cursor.execute("ALTER TABLE exam_month_settings ADD COLUMN exam_end_date TEXT")
 
-        # Seed current month if not exists
+        # Seed current month if not exists (25th to 28th of month)
+        curr_code_seed = date.today().strftime("%Y-%m")
+        curr_name_seed = date.today().strftime("%B %Y")
         cursor.execute("""
-            INSERT OR IGNORE INTO exam_month_settings (month_code, month_name, is_visible_to_staff, is_active)
-            VALUES ('2026-11', 'November 2026', 1, 1)
+            INSERT OR IGNORE INTO exam_month_settings (month_code, month_name, exam_start_date, exam_end_date, is_visible_to_staff, is_active)
+            VALUES (?, ?, ?, ?, 1, 1)
+        """, (curr_code_seed, curr_name_seed, f"{curr_code_seed}-25", f"{curr_code_seed}-28"))
+
+        # Ensure any month settings or legacy single-date student records get default 25th -> 28th schedule
+        cursor.execute("""
+            UPDATE exam_month_settings
+            SET exam_start_date = CASE WHEN exam_start_date IS NULL OR exam_start_date = '' THEN month_code || '-25' ELSE exam_start_date END,
+                exam_end_date = CASE WHEN exam_end_date IS NULL OR exam_end_date = '' THEN month_code || '-28' ELSE exam_end_date END
+            WHERE LENGTH(month_code) = 7
+              AND (exam_start_date IS NULL OR exam_start_date = '' OR exam_end_date IS NULL OR exam_end_date = '')
+        """)
+        cursor.execute("""
+            UPDATE exam_students
+            SET exam_start_date = month_code || '-25',
+                exam_end_date = month_code || '-28',
+                exam_date = month_code || '-25 to ' || month_code || '-28'
+            WHERE LENGTH(month_code) = 7
+              AND (exam_end_date IS NULL OR exam_end_date = '')
         """)
 
         # Call logs table
@@ -2221,8 +2233,31 @@ def format_exam_month_name(month_code, fallback=""):
         return fallback or str(month_code)
 
 
+def default_exam_range_for_month(month_code):
+    """Return default 25th-to-28th date range (YYYY-MM-25, YYYY-MM-28) for any YYYY-MM month."""
+    mc = str(month_code or "").strip()
+    if re.match(r"^\d{4}-\d{2}$", mc):
+        return f"{mc}-25", f"{mc}-28"
+    curr_mc = date.today().strftime("%Y-%m")
+    return f"{curr_mc}-25", f"{curr_mc}-28"
+
+
+def ensure_exam_month_row(cursor, month_code, month_name=None):
+    """Ensure month row exists in exam_month_settings with default 25th-to-28th dates."""
+    def_start, def_end = default_exam_range_for_month(month_code)
+    m_name = (month_name or format_exam_month_name(month_code)).strip()
+    cursor.execute("""
+        INSERT INTO exam_month_settings (month_code, month_name, exam_start_date, exam_end_date, is_visible_to_staff, is_active)
+        VALUES (?, ?, ?, ?, 1, 1)
+        ON CONFLICT(month_code) DO UPDATE SET
+            exam_start_date = CASE WHEN exam_month_settings.exam_start_date IS NULL OR exam_month_settings.exam_start_date = '' THEN excluded.exam_start_date ELSE exam_month_settings.exam_start_date END,
+            exam_end_date = CASE WHEN exam_month_settings.exam_end_date IS NULL OR exam_month_settings.exam_end_date = '' THEN excluded.exam_end_date ELSE exam_month_settings.exam_end_date END
+    """, (month_code, m_name, def_start, def_end))
+    return def_start, def_end
+
+
 def resolve_exam_dates(start_val, end_val, legacy_date="", cursor=None, month_code=None):
-    """Normalize start/end exam dates and validate end >= start when both are set."""
+    """Normalize start/end exam dates, defaulting each month to 25th -> 28th, and validate end >= start."""
     start_date = (start_val or "").strip()
     end_date = (end_val or "").strip()
     legacy = (legacy_date or "").strip()
@@ -2236,17 +2271,26 @@ def resolve_exam_dates(start_val, end_val, legacy_date="", cursor=None, month_co
         else:
             start_date = legacy
 
-    if (not start_date or not end_date) and cursor and month_code:
+    m_start, m_end = default_exam_range_for_month(month_code)
+    if cursor and month_code:
         cursor.execute(
             "SELECT exam_start_date, exam_end_date FROM exam_month_settings WHERE month_code = ?",
             (month_code,)
         )
         mrow = cursor.fetchone()
         if mrow:
-            if not start_date and mrow["exam_start_date"]:
-                start_date = mrow["exam_start_date"]
-            if not end_date and mrow["exam_end_date"]:
-                end_date = mrow["exam_end_date"]
+            if mrow["exam_start_date"]:
+                m_start = mrow["exam_start_date"]
+            if mrow["exam_end_date"]:
+                m_end = mrow["exam_end_date"]
+
+    if not start_date and not end_date:
+        start_date = m_start
+        end_date = m_end
+    elif not start_date:
+        start_date = m_start
+    elif not end_date and m_end >= start_date:
+        end_date = m_end
 
     if start_date and end_date and end_date < start_date:
         return None, None, None, "Exam End Date cannot be earlier than Exam Start Date."
@@ -2268,13 +2312,8 @@ def get_exam_months():
     with get_db() as conn:
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM exam_month_settings WHERE month_code = ?", (current_code,))
-        if not cursor.fetchone():
-            cursor.execute("""
-                INSERT OR IGNORE INTO exam_month_settings (month_code, month_name, is_visible_to_staff, is_active)
-                VALUES (?, ?, 1, 1)
-            """, (current_code, current_name))
-            conn.commit()
+        ensure_exam_month_row(cursor, current_code, current_name)
+        conn.commit()
 
         if is_admin:
             # Admin sees all months ever recorded (current & archive)
@@ -2287,7 +2326,15 @@ def get_exam_months():
                 FROM exam_month_settings s
                 ORDER BY s.month_code DESC
             """)
-            months = [dict(r) for r in cursor.fetchall()]
+            months = []
+            for r in cursor.fetchall():
+                m = dict(r)
+                def_s, def_e = default_exam_range_for_month(m["month_code"])
+                if not m.get("exam_start_date"):
+                    m["exam_start_date"] = def_s
+                if not m.get("exam_end_date"):
+                    m["exam_end_date"] = def_e
+                months.append(m)
             return jsonify({
                 "success": True,
                 "is_admin": True,
@@ -2311,6 +2358,7 @@ def get_exam_months():
                     "message": "Exam calling list is currently hidden by Admin or not published."
                 })
 
+            def_s, def_e = default_exam_range_for_month(current_code)
             cursor.execute("SELECT COUNT(*) as cnt FROM exam_students WHERE month_code = ?", (current_code,))
             total = cursor.fetchone()["cnt"]
             return jsonify({
@@ -2321,8 +2369,8 @@ def get_exam_months():
                 "months": [{
                     "month_code": current_code,
                     "month_name": row["month_name"] or current_name,
-                    "exam_start_date": row["exam_start_date"] or "",
-                    "exam_end_date": row["exam_end_date"] or "",
+                    "exam_start_date": row["exam_start_date"] or def_s,
+                    "exam_end_date": row["exam_end_date"] or def_e,
                     "is_visible_to_staff": 1,
                     "total_students": total
                 }]
@@ -2486,10 +2534,17 @@ def get_exam_students():
             (requested_month,)
         )
         vis_row = cursor.fetchone()
+        def_start, def_end = default_exam_range_for_month(requested_month)
         is_visible_to_staff = vis_row["is_visible_to_staff"] if vis_row else 1
         month_name = vis_row["month_name"] if vis_row and vis_row["month_name"] else format_exam_month_name(requested_month, current_name)
-        month_start = vis_row["exam_start_date"] if vis_row and vis_row["exam_start_date"] else ""
-        month_end = vis_row["exam_end_date"] if vis_row and vis_row["exam_end_date"] else ""
+        month_start = vis_row["exam_start_date"] if vis_row and vis_row["exam_start_date"] else def_start
+        month_end = vis_row["exam_end_date"] if vis_row and vis_row["exam_end_date"] else def_end
+
+        for sd in students:
+            if not sd.get("exam_start_date"):
+                sd["exam_start_date"] = month_start
+            if not sd.get("exam_end_date"):
+                sd["exam_end_date"] = month_end if month_end >= sd["exam_start_date"] else sd["exam_start_date"]
 
     return jsonify({
         "success": True,
@@ -2526,6 +2581,7 @@ def add_exam_student():
 
     with get_db() as conn:
         cursor = conn.cursor()
+        ensure_exam_month_row(cursor, month_code, month_name)
         start_date, end_date, combined_display, err = resolve_exam_dates(
             data.get("exam_start_date"),
             data.get("exam_end_date"),
@@ -2535,12 +2591,6 @@ def add_exam_student():
         )
         if err:
             return jsonify({"error": err}), 400
-
-        cursor.execute("""
-            INSERT INTO exam_month_settings (month_code, month_name, is_visible_to_staff, is_active)
-            VALUES (?, ?, 1, 1)
-            ON CONFLICT(month_code) DO NOTHING
-        """, (month_code, month_name))
 
         cursor.execute("""
             INSERT INTO exam_students 
@@ -2568,19 +2618,22 @@ def update_exam_student(student_id):
     if not student_name or not phone:
         return jsonify({"error": "Student Name and Phone Number are required."}), 400
 
-    start_date, end_date, combined_display, err = resolve_exam_dates(
-        data.get("exam_start_date"),
-        data.get("exam_end_date"),
-        data.get("exam_date", "")
-    )
-    if err:
-        return jsonify({"error": err}), 400
-
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM exam_students WHERE id = ?", (student_id,))
-        if not cursor.fetchone():
+        cursor.execute("SELECT id, month_code FROM exam_students WHERE id = ?", (student_id,))
+        row = cursor.fetchone()
+        if not row:
             return jsonify({"error": "Exam student record not found."}), 404
+
+        start_date, end_date, combined_display, err = resolve_exam_dates(
+            data.get("exam_start_date"),
+            data.get("exam_end_date"),
+            data.get("exam_date", ""),
+            cursor=cursor,
+            month_code=row["month_code"]
+        )
+        if err:
+            return jsonify({"error": err}), 400
 
         cursor.execute("""
             UPDATE exam_students
@@ -2732,11 +2785,7 @@ def import_exam_students():
 
         with get_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO exam_month_settings (month_code, month_name, is_visible_to_staff, is_active)
-                VALUES (?, ?, 1, 1)
-                ON CONFLICT(month_code) DO NOTHING
-            """, (month_code, month_name))
+            ensure_exam_month_row(cursor, month_code, month_name)
 
             for r in records:
                 sname = r.get("name") or r.get("student name") or r.get("student") or r.get("learner name") or ""
