@@ -288,9 +288,9 @@
             <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-300"></i>
             <span>Passwords</span>
           </button>
-          <div class="text-right hidden sm:block">
-            <div class="text-sm font-semibold" id="navUserName">Arsh</div>
-            <div class="text-xs text-indigo-300 capitalize" id="navUserRole">Manager</div>
+          <div class="hidden sm:flex flex-col items-end gap-0.5">
+            <div class="text-sm font-semibold leading-tight" id="navUserName">Arsh</div>
+            <div class="text-[10px] text-indigo-300 capitalize leading-none" id="navUserRole">Manager</div>
           </div>
           <button onclick="logout()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-rose-600 text-xs font-semibold transition">
             <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -855,7 +855,7 @@
           </div>
           <button id="sBtnAddEnquiry" onclick="openModal('addEnquiryModal')" class="flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>+ Add Enquiry</span>
+            <span>Add Enquiry</span>
           </button>
         </div>
       </div>
@@ -1128,6 +1128,229 @@
               <p class="text-xs text-slate-400 mt-1">Admin will publish the exam list once available.</p>
             </div>
           </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. OWNER PREVIEW DASHBOARD (CLEAN EXECUTIVE VIEW FOR SAVITA MAM) -->
+    <div id="ownerSection" class="hidden space-y-5">
+
+      <!-- Welcome Header Strip -->
+      <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-indigo-950 font-black text-lg flex items-center justify-center shadow-xs shrink-0">
+            S
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Welcome, <span id="ownerHeroName">Savita Mam</span></h2>
+            <p class="text-xs text-slate-500 font-medium">Focus Institute • Live Student &amp; Institute Preview</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 self-start sm:self-auto">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold">
+            <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>View-Only Preview</span>
+          </span>
+          <button onclick="loadOwnerPreviewData()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition" title="Refresh Live Data">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Clean Clickable Summary Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <button onclick="setOwnerTab('admitted')" id="oCard-admitted" class="o-card text-left bg-white p-4 sm:p-5 rounded-3xl border-2 border-emerald-500 shadow-sm transition hover:shadow-md flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Admitted Students</div>
+            <div class="text-2xl sm:text-3xl font-black text-emerald-600 mt-1" id="oStatAdmitted">0</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">All enrolled records</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+          </div>
+        </button>
+
+        <button onclick="setOwnerTab('enquiries')" id="oCard-enquiries" class="o-card text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Enquiries</div>
+            <div class="text-2xl sm:text-3xl font-black text-rose-600 mt-1" id="oStatEnquiries">0</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">Admission inquiries</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+            <i data-lucide="phone-incoming" class="w-6 h-6"></i>
+          </div>
+        </button>
+
+        <button onclick="setOwnerTab('fees')" id="oCard-fees" class="o-card text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Fees Pending List</div>
+            <div class="text-2xl sm:text-3xl font-black text-amber-600 mt-1" id="oStatFees">0</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">Students to follow up</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <i data-lucide="wallet" class="w-6 h-6"></i>
+          </div>
+        </button>
+
+        <button onclick="setOwnerTab('exams')" id="oCard-exams" class="o-card text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Exam Calling List</div>
+            <div class="text-2xl sm:text-3xl font-black text-indigo-600 mt-1" id="oStatExams">0</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5" id="oExamMonthLabel">Current Month</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+        </button>
+      </div>
+
+      <!-- OWNER PANEL 1: ADMITTED STUDENTS REGISTER -->
+      <div id="oPanel-admitted" class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Admitted Students Directory</h3>
+            <p class="text-xs text-slate-500">Clean register view of all enrolled students</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 w-full md:w-auto md:min-w-[520px]">
+            <div class="sm:col-span-6 relative">
+              <input type="text" id="oSearchAdmitted" oninput="applyOwnerAdmittedFilter()" placeholder="Search student, father, phone, city..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition" />
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            </div>
+            <div class="sm:col-span-3">
+              <select id="oFilterCourse" onchange="applyOwnerAdmittedFilter()" class="w-full py-2 px-2.5 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">All Courses</option>
+              </select>
+            </div>
+            <div class="sm:col-span-3">
+              <select id="oFilterBatch" onchange="applyOwnerAdmittedFilter()" class="w-full py-2 px-2.5 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">All Batches</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <th class="py-3 px-4 w-14">Sr.</th>
+                <th class="py-3 px-4">Student &amp; Father Name</th>
+                <th class="py-3 px-3">Phone No.</th>
+                <th class="py-3 px-3">Course &amp; Batch</th>
+                <th class="py-3 px-4">Address / City</th>
+              </tr>
+            </thead>
+            <tbody id="oAdmittedTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          </table>
+        </div>
+        <div id="oAdmittedEmpty" class="hidden text-center py-12 text-xs text-slate-400 font-semibold">No students match your search.</div>
+        <div id="oPaginationContainer" class="border-t border-slate-100 pt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"></div>
+      </div>
+
+      <!-- OWNER PANEL 2: ENQUIRIES LIST -->
+      <div id="oPanel-enquiries" class="hidden bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Admission Enquiries Preview</h3>
+            <p class="text-xs text-slate-500">All active inquiries across the institute</p>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="oSearchEnquiries" oninput="renderOwnerEnquiries()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition" />
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <th class="py-3 px-4">Candidate &amp; Father</th>
+                <th class="py-3 px-3">Phone No.</th>
+                <th class="py-3 px-3">Course &amp; Source</th>
+                <th class="py-3 px-3">Address</th>
+                <th class="py-3 px-3">Status</th>
+                <th class="py-3 px-4">Remarks / Notes</th>
+              </tr>
+            </thead>
+            <tbody id="oEnquiriesTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          </table>
+        </div>
+        <div id="oEnquiriesEmpty" class="hidden text-center py-12">
+          <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="phone-incoming" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-700">No Enquiries Found</h4>
+        </div>
+      </div>
+
+      <!-- OWNER PANEL 3: FEES PENDING LIST (NAME, PHONE, ADDRESS, COURSE ONLY) -->
+      <div id="oPanel-fees" class="hidden bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Fees Pending Calling List</h3>
+            <p class="text-xs text-slate-500">Students currently marked for fee follow-up</p>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="oSearchFees" oninput="renderOwnerFees()" placeholder="Search name, phone, address, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <th class="py-3 px-4">Student Name</th>
+                <th class="py-3 px-3">Phone No.</th>
+                <th class="py-3 px-3">Address</th>
+                <th class="py-3 px-4">Course</th>
+              </tr>
+            </thead>
+            <tbody id="oFeesTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          </table>
+        </div>
+        <div id="oFeesEmpty" class="hidden text-center py-12">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="wallet" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-700">No students in fees list</h4>
+        </div>
+      </div>
+
+      <!-- OWNER PANEL 4: EXAM CALLING LIST -->
+      <div id="oPanel-exams" class="hidden bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Monthly Exam List</h3>
+            <p class="text-xs text-slate-500">Exam calling schedule and confirmation status</p>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="oSearchExams" oninput="renderOwnerExams()" placeholder="Search name, phone, course, roll no..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <th class="py-3 px-4">Student &amp; Father</th>
+                <th class="py-3 px-3">Phone No.</th>
+                <th class="py-3 px-3">Course / Roll No</th>
+                <th class="py-3 px-3">Exam Date</th>
+                <th class="py-3 px-4">Call Status</th>
+              </tr>
+            </thead>
+            <tbody id="oExamsTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          </table>
+        </div>
+        <div id="oExamsEmpty" class="hidden text-center py-12">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-700">No exam students found</h4>
         </div>
       </div>
 
@@ -2533,6 +2756,8 @@
       document.getElementById('loginSection').classList.remove('hidden');
       document.getElementById('managerSection').classList.add('hidden');
       document.getElementById('staffSection').classList.add('hidden');
+      const ownerSec = document.getElementById('ownerSection');
+      if (ownerSec) ownerSec.classList.add('hidden');
       document.getElementById('authNav').classList.add('hidden');
       lucide.createIcons({ root: document.getElementById('loginSection') });
     }
@@ -2659,12 +2884,23 @@
         }
       }
 
-      // Savita and Calling staff see the clean, simple directory view (ZERO recycle bin, ZERO manager confusion)
-      const isSimpleStaffView = (currentUser.role !== 'manager') || (currentUser.username === 'savita');
+      const isOwnerPreview = (currentUser.username === 'savita');
+      const isSimpleStaffView = (currentUser.role !== 'manager') && !isOwnerPreview;
+      const ownerSec = document.getElementById('ownerSection');
 
-      if (!isSimpleStaffView) {
+      if (isOwnerPreview) {
+        document.getElementById('managerSection').classList.add('hidden');
+        document.getElementById('staffSection').classList.add('hidden');
+        if (ownerSec) ownerSec.classList.remove('hidden');
+        const oHero = document.getElementById('ownerHeroName');
+        if (oHero) oHero.innerText = 'Savita Mam';
+
+        setOwnerTab('admitted');
+        loadOwnerPreviewData();
+      } else if (!isSimpleStaffView) {
         document.getElementById('managerSection').classList.remove('hidden');
         document.getElementById('staffSection').classList.add('hidden');
+        if (ownerSec) ownerSec.classList.add('hidden');
         const enqAssignGroup = document.getElementById('enqAssignGroup');
         if (enqAssignGroup) enqAssignGroup.classList.remove('hidden');
 
@@ -2707,15 +2943,17 @@
       } else {
         document.getElementById('staffSection').classList.remove('hidden');
         document.getElementById('managerSection').classList.add('hidden');
-        document.getElementById('staffHeroName').innerText = currentUser.name.split(' ')[0];
+        if (ownerSec) ownerSec.classList.add('hidden');
+        const sHero = document.getElementById('staffHeroName');
+        if (sHero) sHero.innerText = currentUser.name.split(' ')[0];
         const enqAssignGroup = document.getElementById('enqAssignGroup');
         if (enqAssignGroup) enqAssignGroup.classList.add('hidden');
 
-        // For View-only users like Madam Savita, hide "+ Add Enquiry" button so it's strictly clean view
+        // Hide "+ Add Enquiry" for view-only staff
         const p = currentUser.permissions || {};
         const sAddEnq = document.getElementById('sBtnAddEnquiry');
         if (sAddEnq) {
-          if (currentUser.username === 'savita' || (p.can_edit === 0 || p.can_edit === false)) {
+          if (p.can_edit === 0 || p.can_edit === false) {
             sAddEnq.classList.add('hidden');
           } else {
             sAddEnq.classList.remove('hidden');
@@ -4095,14 +4333,16 @@
       if (!res.ok) return;
       const data = await res.json();
 
-      document.getElementById('sStatCallsToday').innerText = data.calls_today || 0;
-      document.getElementById('sStatMyEnquiries').innerText = data.my_enquiries_total || 0;
+      const cEl = document.getElementById('sStatCallsToday');
+      if (cEl) cEl.innerText = data.calls_today || 0;
+      const eEl = document.getElementById('sStatMyEnquiries');
+      if (eEl) eEl.innerText = data.my_enquiries_total || 0;
       const b1 = document.getElementById('sBadgeMyEnquiries');
       if (b1) b1.innerText = data.my_enquiries_total || 0;
       const b2 = document.getElementById('sBadgeMyEnquiriesTab');
       if (b2) b2.innerText = data.my_enquiries_total || 0;
       const b3 = document.getElementById('sBadgeAdmittedShared');
-      if (b3) b3.innerText = Number(data.total_admitted_leads || 1927).toLocaleString();
+      if (b3) b3.innerText = Number(data.total_admitted_leads || 1923).toLocaleString();
       const b4 = document.getElementById('sTabBadgeFollowup');
       if (b4) b4.innerText = data.followups_due || 0;
       if (document.getElementById('sBadgeFeesStaff')) document.getElementById('sBadgeFeesStaff').innerText = data.total_fees_pending || 0;
@@ -4111,6 +4351,315 @@
       if (tfBadge) tfBadge.innerText = data.followups_due || 0;
       const tfBadgeEnq = document.getElementById('sTabBadgeFollowupEnq');
       if (tfBadgeEnq) tfBadgeEnq.innerText = data.followups_due || 0;
+    }
+
+    // ----------------------------------------------------------------
+    // OWNER PREVIEW DASHBOARD LOGIC (SAVITA MAM)
+    // ----------------------------------------------------------------
+    let currentOwnerTab = 'admitted';
+    let ownerAdmittedFiltered = [];
+    let oCurrentPage = 1;
+    const oPageSize = 50;
+
+    function setOwnerTab(tab) {
+      currentOwnerTab = tab;
+      const meta = {
+        admitted: { border: 'border-emerald-500' },
+        enquiries: { border: 'border-rose-500' },
+        fees: { border: 'border-amber-500' },
+        exams: { border: 'border-indigo-500' }
+      };
+
+      ['admitted', 'enquiries', 'fees', 'exams'].forEach(t => {
+        const card = document.getElementById(`oCard-${t}`);
+        const panel = document.getElementById(`oPanel-${t}`);
+        if (t === tab) {
+          if (card) card.className = `o-card text-left bg-white p-4 sm:p-5 rounded-3xl border-2 ${meta[t].border} shadow-sm transition hover:shadow-md flex items-center justify-between gap-3`;
+          if (panel) panel.classList.remove('hidden');
+        } else {
+          if (card) card.className = 'o-card text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3';
+          if (panel) panel.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'admitted') applyOwnerAdmittedFilter();
+      else if (tab === 'enquiries') renderOwnerEnquiries();
+      else if (tab === 'fees') renderOwnerFees();
+      else if (tab === 'exams') renderOwnerExams();
+      lucide.createIcons();
+    }
+
+    async function loadOwnerPreviewData() {
+      try {
+        const [statsRes, leadsRes, enqRes, feesRes] = await Promise.all([
+          fetch('/api/staff/stats'),
+          fetch('/api/staff/leads?tab=all'),
+          fetch('/api/staff/enquiries?tab=all'),
+          fetch('/api/fees/students')
+        ]);
+
+        if (statsRes.ok) {
+          const st = await statsRes.json();
+          const aEl = document.getElementById('oStatAdmitted');
+          if (aEl) aEl.innerText = Number(st.total_admitted_leads || 0).toLocaleString();
+          const eEl = document.getElementById('oStatEnquiries');
+          if (eEl) eEl.innerText = Number(st.total_enquiries || 0).toLocaleString();
+          const fEl = document.getElementById('oStatFees');
+          if (fEl) fEl.innerText = Number(st.total_fees_pending || 0).toLocaleString();
+          const xEl = document.getElementById('oStatExams');
+          if (xEl) xEl.innerText = Number(st.total_exam_students || 0).toLocaleString();
+          const xmEl = document.getElementById('oExamMonthLabel');
+          if (xmEl && st.current_exam_month) xmEl.innerText = `Month: ${st.current_exam_month}`;
+        }
+
+        if (leadsRes.ok) {
+          const ld = await leadsRes.json();
+          rawStaffLeads = ld.leads || [];
+          const curC = document.getElementById('oFilterCourse')?.value || '';
+          const curB = document.getElementById('oFilterBatch')?.value || '';
+          populateDropdowns('oFilterCourse', ld.available_courses, 'All Courses', curC);
+          populateDropdowns('oFilterBatch', ld.available_batches, 'All Batches', curB);
+        }
+
+        if (enqRes.ok) {
+          const eq = await enqRes.json();
+          staffEnquiries = eq.enquiries || [];
+          const eEl = document.getElementById('oStatEnquiries');
+          if (eEl) eEl.innerText = Number(staffEnquiries.length).toLocaleString();
+        }
+
+        if (feesRes.ok) {
+          const fe = await feesRes.json();
+          feesStudentsList = fe.students || [];
+          const fEl = document.getElementById('oStatFees');
+          if (fEl) fEl.innerText = Number(fe.total_pending || feesStudentsList.length).toLocaleString();
+        }
+
+        await loadExamMonths();
+        await loadExamStudents();
+
+        applyOwnerAdmittedFilter();
+        renderOwnerEnquiries();
+        renderOwnerFees();
+        renderOwnerExams();
+      } catch (err) {
+        console.error('Error loading Owner Preview data:', err);
+      }
+    }
+
+    function applyOwnerAdmittedFilter() {
+      const q = (document.getElementById('oSearchAdmitted')?.value || '').toLowerCase().trim();
+      const course = document.getElementById('oFilterCourse')?.value || '';
+      const batch = document.getElementById('oFilterBatch')?.value || '';
+
+      let list = rawStaffLeads || [];
+      if (course) list = list.filter(l => l.course === course);
+      if (batch) list = list.filter(l => l.batch === batch);
+      if (q) {
+        list = list.filter(l =>
+          (l.name && l.name.toLowerCase().includes(q)) ||
+          (l.father_name && l.father_name.toLowerCase().includes(q)) ||
+          (l.phone && l.phone.includes(q)) ||
+          (l.alt_phone && l.alt_phone.includes(q)) ||
+          (l.city && l.city.toLowerCase().includes(q)) ||
+          (l.course && l.course.toLowerCase().includes(q)) ||
+          (l.batch && l.batch.toLowerCase().includes(q))
+        );
+      }
+
+      ownerAdmittedFiltered = list;
+      oCurrentPage = 1;
+      renderOwnerAdmitted();
+    }
+
+    function changeOPage(page) {
+      const totalPages = Math.ceil(ownerAdmittedFiltered.length / oPageSize) || 1;
+      oCurrentPage = Math.max(1, Math.min(page, totalPages));
+      renderOwnerAdmitted();
+      const panel = document.getElementById('oPanel-admitted');
+      if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderOwnerAdmitted() {
+      const tbody = document.getElementById('oAdmittedTableBody');
+      const empty = document.getElementById('oAdmittedEmpty');
+      const pag = document.getElementById('oPaginationContainer');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (ownerAdmittedFiltered.length === 0) {
+        if (empty) empty.classList.remove('hidden');
+        if (pag) pag.innerHTML = '';
+        return;
+      }
+      if (empty) empty.classList.add('hidden');
+
+      const totalItems = ownerAdmittedFiltered.length;
+      const totalPages = Math.ceil(totalItems / oPageSize) || 1;
+      const start = (oCurrentPage - 1) * oPageSize;
+      const items = ownerAdmittedFiltered.slice(start, start + oPageSize);
+
+      items.forEach((l, idx) => {
+        const phoneClean = (l.phone || '').replace(/[^0-9]/g, '');
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4 text-slate-400 font-semibold">${start + idx + 1}</td>
+          <td class="py-3 px-4">
+            <div class="font-black text-slate-900 flex items-center gap-1.5">
+              <span>${escapeHtml(l.name)}</span>
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600 shrink-0" title="Admitted"></i>
+            </div>
+            <div class="text-[11px] text-slate-400">${l.father_name ? 'Father: ' + escapeHtml(l.father_name) : 'Father: --'}</div>
+          </td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1.5">
+              <a href="tel:${phoneClean}" class="font-mono font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
+                <span>${escapeHtml(l.phone)}</span>
+              </a>
+              <a href="https://wa.me/91${phoneClean}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+            ${l.alt_phone ? `<div class="text-[10px] font-mono text-slate-400">Alt: ${escapeHtml(l.alt_phone)}</div>` : ''}
+          </td>
+          <td class="py-3 px-3">
+            <span class="inline-block font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg">${escapeHtml(l.course || '--')}</span>
+            ${l.batch ? `<span class="inline-block font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg ml-1">${escapeHtml(l.batch)}</span>` : ''}
+          </td>
+          <td class="py-3 px-4 text-slate-600 font-medium">${escapeHtml(l.city || '--')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (pag) {
+        pag.innerHTML = `
+          <div class="text-slate-500 font-semibold">
+            Showing <b class="text-slate-800">${start + 1}</b> to <b class="text-slate-800">${Math.min(start + oPageSize, totalItems)}</b> of <b class="text-slate-800">${totalItems.toLocaleString()}</b> students
+          </div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="changeOPage(1)" ${oCurrentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 rounded-lg border border-slate-200 bg-white font-bold"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-bold transition"'}>« First</button>
+            <button onclick="changeOPage(${oCurrentPage - 1})" ${oCurrentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 rounded-lg border border-slate-200 bg-white font-bold"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-bold transition"'}>‹ Prev</button>
+            <span class="px-3 py-1 font-black text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg">Page ${oCurrentPage} of ${totalPages}</span>
+            <button onclick="changeOPage(${oCurrentPage + 1})" ${oCurrentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 rounded-lg border border-slate-200 bg-white font-bold"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-bold transition"'}>Next ›</button>
+            <button onclick="changeOPage(${totalPages})" ${oCurrentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 rounded-lg border border-slate-200 bg-white font-bold"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-bold transition"'}>Last »</button>
+          </div>
+        `;
+      }
+      lucide.createIcons({ root: tbody });
+    }
+
+    function renderOwnerEnquiries() {
+      const tbody = document.getElementById('oEnquiriesTableBody');
+      const empty = document.getElementById('oEnquiriesEmpty');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const q = (document.getElementById('oSearchEnquiries')?.value || '').toLowerCase().trim();
+      let list = staffEnquiries || [];
+      if (q) {
+        list = list.filter(eq =>
+          (eq.name && eq.name.toLowerCase().includes(q)) ||
+          (eq.father_name && eq.father_name.toLowerCase().includes(q)) ||
+          (eq.phone && eq.phone.includes(q)) ||
+          (eq.course && eq.course.toLowerCase().includes(q)) ||
+          (eq.city && eq.city.toLowerCase().includes(q))
+        );
+      }
+
+      if (list.length === 0) {
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+      if (empty) empty.classList.add('hidden');
+
+      list.forEach(eq => {
+        const phoneClean = (eq.phone || '').replace(/[^0-9]/g, '');
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-black text-slate-900">${escapeHtml(eq.name)}</div>
+            <div class="text-[11px] text-slate-400">Father: ${escapeHtml(eq.father_name || '--')}</div>
+          </td>
+          <td class="py-3 px-3">
+            <a href="tel:${phoneClean}" class="font-mono font-bold text-slate-800 hover:text-indigo-600">${escapeHtml(eq.phone)}</a>
+            ${eq.alt_phone ? `<div class="text-[10px] font-mono text-slate-400">Alt: ${escapeHtml(eq.alt_phone)}</div>` : ''}
+          </td>
+          <td class="py-3 px-3">
+            <div class="font-bold text-slate-700">${escapeHtml(eq.course || '--')}</div>
+            <div class="text-[10px] text-slate-400">${escapeHtml(eq.source || 'Walk-in')}</div>
+          </td>
+          <td class="py-3 px-3 text-slate-600">${escapeHtml(eq.city || '--')}</td>
+          <td class="py-3 px-3">${getEnquiryBadge(eq.status)}</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHtml(eq.last_remarks || eq.notes || '--')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderOwnerFees() {
+      const tbody = document.getElementById('oFeesTableBody');
+      const empty = document.getElementById('oFeesEmpty');
+      if (!tbody) return;
+      renderFeesRowsInto(tbody, empty, false, 'oSearchFees');
+    }
+
+    function renderOwnerExams() {
+      const tbody = document.getElementById('oExamsTableBody');
+      const empty = document.getElementById('oExamsEmpty');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const xEl = document.getElementById('oStatExams');
+      if (xEl) xEl.innerText = Number((examStudentsList || []).length).toLocaleString();
+
+      const q = (document.getElementById('oSearchExams')?.value || '').toLowerCase().trim();
+      let list = examStudentsList || [];
+      if (q) {
+        list = list.filter(s =>
+          (s.student_name && s.student_name.toLowerCase().includes(q)) ||
+          (s.father_name && s.father_name.toLowerCase().includes(q)) ||
+          (s.phone && s.phone.includes(q)) ||
+          (s.course && s.course.toLowerCase().includes(q)) ||
+          (s.learner_code && s.learner_code.toLowerCase().includes(q))
+        );
+      }
+
+      if (list.length === 0) {
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+      if (empty) empty.classList.add('hidden');
+
+      list.forEach(s => {
+        const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
+        let statusBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Not Called</span>';
+        if (s.call_status === 'CONFIRMED') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-200">Confirmed</span>';
+        else if (s.call_status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Absent</span>';
+        else if (s.call_status === 'CALL_BACK') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Call Back</span>';
+        else if (s.call_status === 'FEE_ISSUE') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black border border-purple-200">Fee Issue</span>';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-black text-slate-900">${escapeHtml(s.student_name)}</div>
+            <div class="text-[11px] text-slate-400">Father: ${escapeHtml(s.father_name || '--')}</div>
+          </td>
+          <td class="py-3 px-3">
+            <a href="tel:${phoneClean}" class="font-mono font-bold text-slate-800 hover:text-indigo-600">${escapeHtml(s.phone)}</a>
+          </td>
+          <td class="py-3 px-3">
+            <div class="font-bold text-slate-700">${escapeHtml(s.course || '--')}</div>
+            <div class="text-[10px] font-mono text-slate-500 font-bold">${escapeHtml(s.learner_code || '--')}</div>
+          </td>
+          <td class="py-3 px-3 font-bold text-indigo-700">${escapeHtml(s.exam_date || 'TBD')}</td>
+          <td class="py-3 px-4">${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     // ----------------------------------------------------------------
@@ -4783,7 +5332,9 @@
           const syncText = document.getElementById('liveSyncText');
           if (syncText) syncText.innerText = 'Syncing...';
 
-          if (currentUser.role === 'manager') {
+          if (currentUser.username === 'savita') {
+            await loadOwnerPreviewData();
+          } else if (currentUser.role === 'manager') {
             await loadManagerData();
           } else {
             await loadStaffData();
@@ -5325,6 +5876,9 @@
         if (b2) b2.innerText = `Nov (${examStudentsList.length})`;
 
         renderExamStudents();
+        if (currentUser && currentUser.username === 'savita') {
+          renderOwnerExams();
+        }
       } catch (err) {
         console.error('Error loading exam students:', err);
       }
@@ -5347,6 +5901,9 @@
       clearTimeout(examSearchTimeout);
       examSearchTimeout = setTimeout(() => {
         renderExamStudents();
+        if (currentUser && currentUser.username === 'savita') {
+          renderOwnerExams();
+        }
       }, 250);
     }
 
