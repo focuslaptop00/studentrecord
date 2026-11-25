@@ -5928,10 +5928,28 @@
     // ==========================================
     // MONTHLY CALL FOR EXAM JAVASCRIPT LOGIC
     // ==========================================
+    function getDefaultExamDatesForMonth(monthCode) {
+      const now = new Date();
+      const fallbackYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const mc = /^\d{4}-\d{2}$/.test(String(monthCode || '').trim()) ? String(monthCode).trim() : fallbackYm;
+      return { month_code: mc, start: `${mc}-25`, end: `${mc}-28` };
+    }
+
+    function buildExamMonthMeta(monthCode, source = {}) {
+      const def = getDefaultExamDatesForMonth(monthCode);
+      const mc = def.month_code;
+      return {
+        month_code: mc,
+        month_name: (source && source.month_name) || formatExamMonthLabel(mc),
+        exam_start_date: (source && source.exam_start_date) || def.start,
+        exam_end_date: (source && source.exam_end_date) || def.end
+      };
+    }
+
     let examStudentsList = [];
     let examMonthsList = [];
-    let currentExamMonthCode = '2026-11';
-    let currentExamMonthMeta = { month_code: '2026-11', month_name: 'November 2026', exam_start_date: '', exam_end_date: '' };
+    let currentExamMonthCode = getDefaultExamDatesForMonth('').month_code;
+    let currentExamMonthMeta = buildExamMonthMeta(currentExamMonthCode);
     let currentExamFilter = 'all';
     let isExamVisibleToStaff = true;
     let examSearchTimeout = null;
@@ -5966,6 +5984,17 @@
         } else {
           start = legacy;
         }
+      }
+      const def = getDefaultExamDatesForMonth((item && item.month_code) || currentExamMonthCode);
+      const monthStart = currentExamMonthMeta.exam_start_date || def.start;
+      const monthEnd = currentExamMonthMeta.exam_end_date || def.end;
+      if (!start && !end) {
+        start = monthStart;
+        end = monthEnd;
+      } else if (!start) {
+        start = monthStart;
+      } else if (!end && monthEnd >= start) {
+        end = monthEnd;
       }
       return { start, end };
     }
@@ -6058,14 +6087,7 @@
         }
 
         const activeObj = examMonthsList.find(m => m.month_code === currentExamMonthCode);
-        if (activeObj) {
-          currentExamMonthMeta = {
-            month_code: activeObj.month_code,
-            month_name: activeObj.month_name || formatExamMonthLabel(activeObj.month_code),
-            exam_start_date: activeObj.exam_start_date || '',
-            exam_end_date: activeObj.exam_end_date || ''
-          };
-        }
+        currentExamMonthMeta = buildExamMonthMeta(currentExamMonthCode, activeObj || {});
         updateExamScheduleUI();
 
         if (!data.is_admin && !data.visible) {
@@ -6166,12 +6188,7 @@
     function changeExamMonth(monthCode) {
       currentExamMonthCode = monthCode;
       const m = (examMonthsList || []).find(x => x.month_code === monthCode);
-      currentExamMonthMeta = {
-        month_code: monthCode,
-        month_name: (m && m.month_name) || formatExamMonthLabel(monthCode),
-        exam_start_date: (m && m.exam_start_date) || '',
-        exam_end_date: (m && m.exam_end_date) || ''
-      };
+      currentExamMonthMeta = buildExamMonthMeta(monthCode, m || {});
       updateExamScheduleUI();
       loadExamStudents();
     }
@@ -6184,12 +6201,7 @@
         examStudentsList = data.students || [];
 
         if (data.month_code) {
-          currentExamMonthMeta = {
-            month_code: data.month_code,
-            month_name: data.month_name || formatExamMonthLabel(data.month_code),
-            exam_start_date: data.exam_start_date || '',
-            exam_end_date: data.exam_end_date || ''
-          };
+          currentExamMonthMeta = buildExamMonthMeta(data.month_code, data);
           updateExamScheduleUI();
         }
 
