@@ -599,7 +599,7 @@
         </div>
       </div>
 
-            <!-- PANEL: FEES PENDING STUDENTS (MANAGER) -->
+      <!-- PANEL: FEES PENDING STUDENTS (MANAGER) -->
       <div id="mFeesPanel" class="hidden space-y-4">
         <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-xs border border-slate-200/90 space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -609,13 +609,17 @@
               </span>
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Pending Calling List</h3>
+                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Pending List</h3>
                   <span id="mFeesCountBadge" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black border border-amber-200">0 Students</span>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">Students with pending fees. Staff will call these students for fee recovery.</p>
+                <p class="text-xs text-slate-500 font-medium">Manage students with pending fees. Use Fees Clear when completed or Delete to remove.</p>
               </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+              <div class="relative w-full sm:w-64">
+                <input type="text" id="mFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              </div>
               <button onclick="openMarkFeePendingModal()" class="flex items-center gap-1.5 px-3.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span>+ Mark Student Fee Pending</span>
@@ -623,43 +627,17 @@
             </div>
           </div>
 
-          <!-- Filter & Search Toolbar -->
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap gap-1.5">
-              <button onclick="setFeeFilter('all')" id="mFeeFilterBtn-all" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs">
-                All Pending
-              </button>
-              <button onclick="setFeeFilter('overdue')" id="mFeeFilterBtn-overdue" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-                <span>Overdue</span>
-                <span id="mBadgeFeeOverdue" class="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
-              </button>
-              <button onclick="setFeeFilter('today')" id="mFeeFilterBtn-today" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                Due Today
-              </button>
-              <button onclick="setFeeFilter('upcoming')" id="mFeeFilterBtn-upcoming" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                Upcoming
-              </button>
-              <button onclick="setFeeFilter('paid')" id="mFeeFilterBtn-paid" class="m-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
-                Paid History
-              </button>
-            </div>
-            <div class="relative w-full sm:w-72">
-              <input type="text" id="mFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
-              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-            </div>
-          </div>
-
-          <!-- Fees Table -->
+          <!-- Fees Table (Admin Single List) -->
           <div class="overflow-x-auto border border-slate-100 rounded-2xl">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
                   <th class="py-3 px-4">Student & Father</th>
                   <th class="py-3 px-3">Contact</th>
+                  <th class="py-3 px-3">Address</th>
                   <th class="py-3 px-3">Course / Batch</th>
                   <th class="py-3 px-3">Pending Amount</th>
-                  <th class="py-3 px-3">Due Date</th>
-                  <th class="py-3 px-4">Latest Calling Remark</th>
+                  <th class="py-3 px-4">Remarks / Notes</th>
                   <th class="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -673,7 +651,7 @@
               <i data-lucide="wallet" class="w-6 h-6"></i>
             </div>
             <h4 class="text-sm font-bold text-slate-700">No students found with pending fees</h4>
-            <p class="text-xs text-slate-400 mt-1">Click "+ Mark Student Fee Pending" to add students to this calling list.</p>
+            <p class="text-xs text-slate-400 mt-1">Click "+ Mark Student Fee Pending" to add students to this list.</p>
           </div>
         </div>
       </div>
@@ -1017,26 +995,24 @@
                   <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Calling List</h3>
                   <span id="sFeesCountBadge" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black border border-amber-200">0 Students</span>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">Call these students regarding fees and record calling remarks.</p>
+                <p class="text-xs text-slate-500 font-medium">Students to call.</p>
               </div>
             </div>
             <div class="relative w-full sm:w-72">
-              <input type="text" id="sFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
+              <input type="text" id="sFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, address, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
             </div>
           </div>
 
-          <!-- Fees Table (Staff View - Simple Calling Data Only, NO Pending Amount) -->
+          <!-- Fees Table (Staff View - Strictly Name, Phone No, Address & Course Only) -->
           <div class="overflow-x-auto border border-slate-100 rounded-2xl">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  <th class="py-3 px-4">Student & Father</th>
-                  <th class="py-3 px-3">Contact</th>
-                  <th class="py-3 px-3">Course / Batch</th>
-                  <th class="py-3 px-3">Due Date</th>
-                  <th class="py-3 px-4">Latest Calling Remark</th>
-                  <th class="py-3 px-4 text-right">Action</th>
+                  <th class="py-3 px-4">Student Name</th>
+                  <th class="py-3 px-3">Phone No.</th>
+                  <th class="py-3 px-3">Address</th>
+                  <th class="py-3 px-4">Course</th>
                 </tr>
               </thead>
               <tbody id="sFeesTableBody" class="divide-y divide-slate-100 text-slate-700">
@@ -2048,25 +2024,20 @@
       <form onsubmit="handleMarkFeePendingSubmit(event)" class="p-5 space-y-3.5 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-1">Select Student <span class="text-rose-500">*</span></label>
+          <input type="text" id="feeStudentQuickSearch" oninput="filterFeeStudentDropdown()" placeholder="Type student name or phone to filter..." class="w-full px-3 py-2 mb-1.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs" />
           <select id="feeStudentSelect" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
             <option value="">-- Choose Student from Directory --</option>
           </select>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Pending Amount <span class="text-rose-500">*</span></label>
-            <input type="text" id="feePendingAmountInput" placeholder="e.g. ₹2,500" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-slate-800" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Due Date</label>
-            <input type="date" id="feeDueDateInput" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700" />
-          </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Pending Amount <span class="text-rose-500">*</span></label>
+          <input type="text" id="feePendingAmountInput" placeholder="e.g. ₹2,500" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-slate-800" />
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Fee Notes / Installment Details</label>
-          <textarea id="feeRemarksInput" rows="2" placeholder="e.g. 2nd Installment balance, father requested 5 days..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700"></textarea>
+          <label class="block font-bold text-slate-700 mb-1">Notes / Remarks</label>
+          <textarea id="feeRemarksInput" rows="2" placeholder="e.g. 2nd Installment balance..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-700"></textarea>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
@@ -4894,7 +4865,7 @@
 
     async function loadFeesStudents(forceFetch = false) {
       try {
-        const res = await fetch(`/api/fees/students?filter=${currentFeeFilter}`);
+        const res = await fetch('/api/fees/students');
         if (!res.ok) return;
         const data = await res.json();
         feesStudentsList = data.students || [];
@@ -4910,14 +4881,6 @@
         const b4 = document.getElementById('sFeesCountBadge');
         if (b4) b4.innerText = `${count} Students`;
 
-        // Update overdue badge
-        const todayStr = new Date().toISOString().split('T')[0];
-        const overdueCount = feesStudentsList.filter(s => s.fee_due_date && s.fee_due_date < todayStr).length;
-        const ob1 = document.getElementById('mBadgeFeeOverdue');
-        if (ob1) ob1.innerText = overdueCount;
-        const ob2 = document.getElementById('sBadgeFeeOverdue');
-        if (ob2) ob2.innerText = overdueCount;
-
         renderFeesStudents();
       } catch (err) {
         console.error('Error loading fees students:', err);
@@ -4925,15 +4888,7 @@
     }
 
     function setFeeFilter(filter) {
-      currentFeeFilter = filter;
-      document.querySelectorAll('.m-fee-filter-btn, .s-fee-filter-btn').forEach(btn => {
-        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition';
-      });
-      const active1 = document.getElementById(`mFeeFilterBtn-${filter}`);
-      if (active1) active1.className = 'm-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs';
-      const active2 = document.getElementById(`sFeeFilterBtn-${filter}`);
-      if (active2) active2.className = 's-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs';
-
+      currentFeeFilter = 'all';
       loadFeesStudents();
     }
 
@@ -4954,7 +4909,7 @@
         renderFeesRowsInto(mBody, mEmpty, true, 'mFeeSearchInput');
       }
 
-      // 2. Render Staff Table (for Staff, Madam Savita, or staff view - NO Pending Amount shown)
+      // 2. Render Staff Table (Strictly Name, Phone No, Address & Course Only)
       const sBody = document.getElementById('sFeesTableBody');
       const sEmpty = document.getElementById('sFeesEmptyState');
       if (sBody) {
@@ -4973,6 +4928,7 @@
           (s.name && s.name.toLowerCase().includes(search)) ||
           (s.father_name && s.father_name.toLowerCase().includes(search)) ||
           (s.phone && s.phone.includes(search)) ||
+          (s.city && s.city.toLowerCase().includes(search)) ||
           (s.course && s.course.toLowerCase().includes(search)) ||
           (s.batch && s.batch.toLowerCase().includes(search))
         );
@@ -4984,120 +4940,143 @@
       }
       if (emptyState) emptyState.classList.add('hidden');
 
-      const todayStr = new Date().toISOString().split('T')[0];
-
       filtered.forEach((s) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition';
-
-        let dueDateBadge = '<span class="text-slate-400 font-medium text-[11px]">Not Set</span>';
-        if (s.fee_due_date) {
-          if (s.fee_due_date < todayStr) {
-            dueDateBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Overdue (${s.fee_due_date})</span>`;
-          } else if (s.fee_due_date === todayStr) {
-            dueDateBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Due Today</span>`;
-          } else {
-            dueDateBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">${s.fee_due_date}</span>`;
-          }
-        }
 
         const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
         const waLink = `https://wa.me/91${phoneClean}`;
         const telLink = `tel:${phoneClean}`;
 
-        let pendingAmountCol = '';
-        let actionHtml = '';
         if (isManagerMode) {
-          pendingAmountCol = `
+          tr.innerHTML = `
+            <td class="py-3 px-4">
+              <div class="font-black text-slate-800 text-xs">${escapeHtml(s.name)}</div>
+              <div class="text-[11px] text-slate-400">Father: ${escapeHtml(s.father_name || '--')}</div>
+            </td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-1.5">
+                <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
+                  <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
+                  <span>${escapeHtml(s.phone)}</span>
+                </a>
+                <a href="${waLink}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp Message">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                </a>
+              </div>
+              ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${escapeHtml(s.alt_phone)}</div>` : ''}
+            </td>
+            <td class="py-3 px-3 text-slate-600 font-medium">
+              ${escapeHtml(s.city || '--')}
+            </td>
+            <td class="py-3 px-3">
+              <div class="font-bold text-slate-700">${escapeHtml(s.course || 'Course')}</div>
+              <div class="text-[10px] text-slate-400 font-medium">${escapeHtml(s.batch || '')}</div>
+            </td>
             <td class="py-3 px-3 font-black text-amber-700 text-xs">
-              ${s.fee_pending_amount || 'Pending'}
+              ${escapeHtml(s.fee_pending_amount || 'Pending')}
+            </td>
+            <td class="py-3 px-4">
+              <div class="text-xs text-slate-700 font-medium">${escapeHtml(s.fee_remarks || s.last_remarks || 'No remarks')}</div>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="handleMarkFeePaid(${s.id}, '${escapeHtml(s.name)}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Mark Student Fees Complete / Clear">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                  <span>Fees Clear</span>
+                </button>
+                <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${escapeHtml(s.phone)}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Call Log / Remark">
+                  <i data-lucide="phone-call" class="w-3 h-3"></i>
+                  <span>Call Log</span>
+                </button>
+                <button onclick="openMarkFeePendingModal(${s.id}, '${escapeHtml(s.name)}', '${escapeHtml(s.phone)}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Edit Fee Amount / Notes">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="handleDeleteFeePending(${s.id}, '${escapeHtml(s.name)}')" class="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 border border-rose-200 rounded-lg transition" title="Delete from Fees Pending List">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </td>
           `;
-          // Manager actions: Call Log, Paid, Edit
-          actionHtml = `
-            <div class="flex items-center justify-end gap-1.5">
-              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Log Call Outcome">
-                <i data-lucide="phone-call" class="w-3 h-3"></i>
-                <span>Call Log</span>
-              </button>
-              <button onclick="handleMarkFeePaid(${s.id}, '${escapeHtml(s.name)}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs" title="Mark Fee Paid">
-                <i data-lucide="check" class="w-3 h-3"></i>
-                <span>Paid</span>
-              </button>
-              <button onclick="openMarkFeePendingModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Edit Fee Amount/Date">
-                <i data-lucide="edit-3" class="w-3 h-3"></i>
-              </button>
-            </div>
-          `;
         } else {
-          // Staff calling view: PURE CALLING ACTION ONLY (NO pending amount, NO paid button, NO edit button)
-          actionHtml = `
-            <div class="flex items-center justify-end">
-              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '')" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition text-xs flex items-center gap-1.5 shadow-xs" title="Call student and record remark">
-                <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
-                <span>Call / Add Remark</span>
-              </button>
-            </div>
+          // Staff View: Strictly ONLY Student Name, Phone No, Address, Course — nothing else
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-black text-slate-800 text-xs">
+              ${escapeHtml(s.name)}
+            </td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-1.5">
+                <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
+                  <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
+                  <span>${escapeHtml(s.phone)}</span>
+                </a>
+                <a href="${waLink}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp Message">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                </a>
+              </div>
+              ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${escapeHtml(s.alt_phone)}</div>` : ''}
+            </td>
+            <td class="py-3 px-3 text-slate-700 font-medium">
+              ${escapeHtml(s.city || '--')}
+            </td>
+            <td class="py-3 px-4 font-bold text-slate-700">
+              ${escapeHtml(s.course || '--')}
+            </td>
           `;
         }
-
-        tr.innerHTML = `
-          <td class="py-3 px-4">
-            <div class="font-black text-slate-800 text-xs">${s.name}</div>
-            <div class="text-[11px] text-slate-400">Father: ${s.father_name || '--'}</div>
-          </td>
-          <td class="py-3 px-3">
-            <div class="flex items-center gap-1.5">
-              <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
-                <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
-                <span>${s.phone}</span>
-              </a>
-              <a href="${waLink}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp Message">
-                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-              </a>
-            </div>
-            ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${s.alt_phone}</div>` : ''}
-          </td>
-          <td class="py-3 px-3">
-            <div class="font-bold text-slate-700">${s.course || 'Course'}</div>
-            <div class="text-[10px] text-slate-400 font-medium">${s.batch || 'Batch'}</div>
-          </td>
-          ${pendingAmountCol}
-          <td class="py-3 px-3">
-            ${dueDateBadge}
-          </td>
-          <td class="py-3 px-4">
-            <div class="text-xs text-slate-700 font-medium">${s.fee_remarks || s.last_remarks || 'No remarks logged'}</div>
-            ${s.last_caller_name ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${s.last_caller_name}</div>` : ''}
-          </td>
-          <td class="py-3 px-4 text-right">
-            ${actionHtml}
-          </td>
-        `;
         tbody.appendChild(tr);
       });
       lucide.createIcons({ root: tbody });
     }
 
-    function openMarkFeePendingModal(leadId = null, name = '', phone = '') {
+    let _editingFeeLeadId = null;
+
+    function filterFeeStudentDropdown(selectedId = null, fallbackName = '', fallbackPhone = '') {
       const select = document.getElementById('feeStudentSelect');
-      if (select) {
-        select.innerHTML = '<option value="">-- Choose Student from Directory --</option>';
-        managerLeads.slice(0, 300).forEach(l => {
-          const opt = document.createElement('option');
-          opt.value = l.id;
-          opt.innerText = `${l.name} (${l.phone}) - ${l.course || ''}`;
-          if (leadId && l.id === leadId) opt.selected = true;
-          select.appendChild(opt);
-        });
-        if (leadId && !managerLeads.some(l => l.id === leadId)) {
-          const opt = document.createElement('option');
-          opt.value = leadId;
-          opt.innerText = `${name} (${phone})`;
-          opt.selected = true;
-          select.appendChild(opt);
-        }
+      if (!select) return;
+      const q = (document.getElementById('feeStudentQuickSearch')?.value || '').toLowerCase().trim();
+      const targetId = selectedId !== null ? selectedId : (_editingFeeLeadId || select.value);
+
+      select.innerHTML = '<option value="">-- Choose Student from Directory --</option>';
+      let list = managerLeads || [];
+      if (q) {
+        list = list.filter(l =>
+          (l.name && l.name.toLowerCase().includes(q)) ||
+          (l.phone && l.phone.includes(q)) ||
+          (l.course && l.course.toLowerCase().includes(q))
+        );
       }
+
+      list.slice(0, 300).forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.id;
+        opt.innerText = `${l.name} (${l.phone}) - ${l.course || ''}`;
+        if (targetId && String(l.id) === String(targetId)) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      if (targetId && !list.slice(0, 300).some(l => String(l.id) === String(targetId))) {
+        const match = (managerLeads || []).find(l => String(l.id) === String(targetId));
+        const opt = document.createElement('option');
+        opt.value = targetId;
+        opt.innerText = match ? `${match.name} (${match.phone}) - ${match.course || ''}` : `${fallbackName} (${fallbackPhone})`;
+        opt.selected = true;
+        select.appendChild(opt);
+      }
+    }
+
+    function openMarkFeePendingModal(leadId = null, name = '', phone = '') {
+      _editingFeeLeadId = leadId;
+      const searchBox = document.getElementById('feeStudentQuickSearch');
+      if (searchBox) searchBox.value = '';
+
+      const existing = leadId ? feesStudentsList.find(x => String(x.id) === String(leadId)) : null;
+      const amtEl = document.getElementById('feePendingAmountInput');
+      const remEl = document.getElementById('feeRemarksInput');
+      if (amtEl) amtEl.value = existing ? (existing.fee_pending_amount || '') : '';
+      if (remEl) remEl.value = existing ? (existing.fee_remarks || '') : '';
+
+      filterFeeStudentDropdown(leadId, name, phone);
       openModal('markFeePendingModal');
     }
 
@@ -5105,18 +5084,17 @@
       e.preventDefault();
       const leadId = document.getElementById('feeStudentSelect').value;
       const amount = document.getElementById('feePendingAmountInput').value;
-      const dueDate = document.getElementById('feeDueDateInput').value;
       const remarks = document.getElementById('feeRemarksInput').value;
 
       try {
         const res = await fetch('/api/fees/mark-pending', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lead_id: leadId, amount, due_date: dueDate, remarks })
+          body: JSON.stringify({ lead_id: leadId, amount, due_date: '', remarks })
         });
         const data = await res.json();
         if (res.ok) {
-          showToast(data.message || 'Fee pending recorded!');
+          showToast(data.message || 'Added to Fees Pending list!');
           closeModal('markFeePendingModal');
           loadFeesStudents(true);
         } else {
@@ -5128,19 +5106,39 @@
     }
 
     async function handleMarkFeePaid(leadId, studentName) {
-      if (!confirm(`Mark fee as PAID for student '${studentName}'? This will clear them from the pending list.`)) return;
+      if (!confirm(`Mark fees COMPLETE / CLEAR for student '${studentName}'? This will remove them from the pending list.`)) return;
       try {
         const res = await fetch('/api/fees/mark-paid', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lead_id: leadId, remarks: 'Payment received' })
+          body: JSON.stringify({ lead_id: leadId, remarks: 'Fees Clear' })
         });
         const data = await res.json();
         if (res.ok) {
-          showToast(data.message || 'Fee marked as paid!');
+          showToast(data.message || 'Fees cleared!');
           loadFeesStudents(true);
         } else {
           showToast(data.error || 'Failed to update', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
+    async function handleDeleteFeePending(leadId, studentName) {
+      if (!confirm(`Delete '${studentName}' from the Fees Pending list?\n(The student stays in the main directory.)`)) return;
+      try {
+        const res = await fetch('/api/fees/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: leadId })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Student deleted from Fees Pending list!');
+          loadFeesStudents(true);
+        } else {
+          showToast(data.error || 'Failed to delete', false);
         }
       } catch (err) {
         showToast('Network error', false);
