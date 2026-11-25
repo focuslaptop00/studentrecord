@@ -345,27 +345,31 @@ def init_db():
         if "theme_preference" not in u_columns:
             cursor.execute("ALTER TABLE users ADD COLUMN theme_preference TEXT DEFAULT 'light'")
 
-        # Default Users: Arsh (Manager) and staff
-        cursor.execute("SELECT id FROM users WHERE username = 'arsh'")
-        if not cursor.fetchone():
-            cursor.execute("""
-                INSERT INTO users (name, username, password_hash, role, phone)
-                VALUES (?, ?, ?, 'manager', ?)
-            """, ("Arsh (Manager)", "arsh", generate_password_hash("arsh123"), "9876500001"))
-
-        cursor.execute("SELECT COUNT(*) as count FROM users WHERE role = 'staff'")
-        staff_count = cursor.fetchone()["count"]
-        if staff_count == 0:
-            staff_members = [
-                ("Gurpreet Singh", "gurpreet", "staff123", "9876500002"),
-                ("Simran Kaur", "simran", "staff123", "9876500003"),
-                ("Aman Sharma", "aman", "staff123", "9876500004"),
-            ]
-            for name, uname, pwd, ph in staff_members:
+        # Permanent Default Accounts (guaranteed across every update/deploy)
+        view_only_perms = json.dumps({
+            "can_view": 1,
+            "can_edit": 0,
+            "can_delete": 0,
+            "can_restore": 0,
+            "can_import": 0,
+            "can_export": 0,
+            "can_manage_users": 0
+        })
+        permanent_accounts = [
+            ("Arsh (Manager)", "arsh", "arsh123", "manager", "9876500001", ""),
+            ("Mandeep", "mandeep", "mandeep123", "staff", "9876543210", view_only_perms),
+            ("Savita (Owner)", "savita", "savita123", "staff", "9876599999", view_only_perms),
+            ("Navdeep", "nav", "nav123", "staff", "", view_only_perms),
+            ("Arju", "arju", "arju123", "staff", "", view_only_perms),
+            ("Arshdeep", "arshdeep", "arshdeep123", "staff", "", view_only_perms),
+        ]
+        for full_name, uname, default_pwd, role_val, phone_val, perms_val in permanent_accounts:
+            cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (uname,))
+            if not cursor.fetchone():
                 cursor.execute("""
-                    INSERT INTO users (name, username, password_hash, role, phone)
-                    VALUES (?, ?, ?, 'staff', ?)
-                """, (name, uname, generate_password_hash(pwd), ph))
+                    INSERT INTO users (name, username, password_hash, role, phone, is_active, permissions)
+                    VALUES (?, ?, ?, ?, ?, 1, ?)
+                """, (full_name, uname, generate_password_hash(default_pwd), role_val, phone_val, perms_val))
 
         # Real-time Auto-Sync Tracking Table
         cursor.execute("""
@@ -2918,8 +2922,6 @@ if __name__ == "__main__":
     print("================================================================")
     print(" FOCUS INSTITUTE - STUDENT CALLING & CRM PORTAL")
     print(f" Server running at: http://127.0.0.1:{port}")
-    print(" Manager Login: arsh / arsh123")
-    print(" Staff Logins:  gurpreet / staff123, simran / staff123, aman / staff123")
-    print(" Staff Privacy: Restricted to 6 Fields (Name, Father, Phones, Course, Batch, Address)")
+    print(" Default Accounts: arsh, mandeep, savita, nav, arju, arshdeep")
     print("================================================================")
     app.run(host="0.0.0.0", port=port, debug=False)
