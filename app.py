@@ -1009,7 +1009,7 @@ def staff_log_call(lead_id):
 
     valid_statuses = [
         "NEW", "EXAM_INFORMED", "FEE_REMINDER", "FOLLOW_UP", "COMPLETED",
-        "RINGING", "SWITCHED_OFF", "NOT_INTERESTED", "WRONG_NUMBER", "ADMISSION_DONE", "INTERESTED"
+        "RINGING", "SWITCHED_OFF", "NOT_INTERESTED", "WRONG_NUMBER", "ADMISSION_DONE", "INTERESTED", "OTHER"
     ]
     if status not in valid_statuses:
         return jsonify({"error": "Invalid status."}), 400
@@ -1903,7 +1903,7 @@ def update_enquiry_status(enquiry_id):
     next_followup_date = data.get("next_followup_date", None)
     cancellation_reason = data.get("cancellation_reason", "").strip()
 
-    valid_statuses = ["NEW", "FOLLOW_UP", "ADMISSION_DONE", "CANCELLED", "RINGING", "VISIT_SCHEDULED"]
+    valid_statuses = ["NEW", "FOLLOW_UP", "ADMISSION_DONE", "CANCELLED", "RINGING", "VISIT_SCHEDULED", "OTHER"]
     if status not in valid_statuses:
         return jsonify({"error": "Invalid enquiry status"}), 400
 
@@ -2781,7 +2781,7 @@ def log_exam_student_call(student_id):
     remarks = data.get("remarks", "").strip()
     caller_name = session.get("name") or session.get("username") or "Staff"
 
-    valid_statuses = ["NOT_CALLED", "CONFIRMED", "ABSENT", "CALL_BACK", "FEE_ISSUE", "WRONG_NUMBER"]
+    valid_statuses = ["NOT_CALLED", "CONFIRMED", "ABSENT", "CALL_BACK", "FEE_ISSUE", "WRONG_NUMBER", "OTHER"]
     if call_status not in valid_statuses:
         return jsonify({"error": "Invalid call status"}), 400
 
