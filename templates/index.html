@@ -771,13 +771,14 @@
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th class="py-3 px-3 w-12">Sr</th>
                     <th class="py-3 px-4">Student & Father</th>
                     <th class="py-3 px-3">Contact</th>
                     <th class="py-3 px-3">Course / Roll No</th>
                     <th class="py-3 px-3">Exam Dates (Start - End)</th>
                     <th class="py-3 px-3">Call Status</th>
-                    <th class="py-3 px-4">Latest Remarks</th>
-                    <th class="py-3 px-4 text-right">Actions</th>
+                    <th class="py-3 px-4">Student Said / Remarks</th>
+                    <th class="py-3 px-4 text-right">Call Actions</th>
                   </tr>
                 </thead>
                 <tbody id="mExamTableBody" class="divide-y divide-slate-100 text-slate-700">
@@ -969,6 +970,21 @@
                 Cancelled
               </button>
             </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200 text-xs">
+                <button type="button" onclick="setStaffEnquiryScope('all')" id="sEnqScopeBtn-all" class="px-2.5 py-1 rounded-lg font-bold bg-white text-slate-900 shadow-xs transition">
+                  All Staff Enquiries
+                </button>
+                <button type="button" onclick="setStaffEnquiryScope('my')" id="sEnqScopeBtn-my" class="px-2.5 py-1 rounded-lg font-semibold text-slate-600 hover:text-slate-900 transition">
+                  My Enquiries
+                </button>
+              </div>
+              <button type="button" onclick="openModal('addEnquiryModal')" class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Add My Enquiry</span>
+              </button>
+            </div>
           </div>
 
           <!-- Search Input -->
@@ -1130,13 +1146,14 @@
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                    <th class="py-3 px-3 w-12">Sr</th>
                     <th class="py-3 px-4">Student & Father</th>
                     <th class="py-3 px-3">Contact</th>
                     <th class="py-3 px-3">Course / Roll No</th>
                     <th class="py-3 px-3">Exam Dates (Start - End)</th>
                     <th class="py-3 px-3">Call Status</th>
-                    <th class="py-3 px-4">Latest Remarks</th>
-                    <th class="py-3 px-4 text-right">Action</th>
+                    <th class="py-3 px-4">Student Said / Remarks</th>
+                    <th class="py-3 px-4 text-right">Call Actions</th>
                   </tr>
                 </thead>
                 <tbody id="sExamTableBody" class="divide-y divide-slate-100 text-slate-700">
@@ -2530,8 +2547,8 @@
             <i data-lucide="phone-call" class="w-5 h-5 text-white"></i>
           </div>
           <div>
-            <h3 class="text-base font-black tracking-tight">Exam Calling & Confirmation</h3>
-            <p class="text-[11px] text-indigo-100 font-medium">Confirm exam attendance and details</p>
+            <h3 class="text-base font-black tracking-tight">Exam Call Action &amp; Student Response</h3>
+            <p class="text-[11px] text-indigo-100 font-medium">Record call result and type what the student said</p>
           </div>
         </div>
         <button onclick="closeModal('logExamCallModal')" class="p-1 rounded-xl hover:bg-white/20 text-white/80 hover:text-white transition">
@@ -2542,11 +2559,11 @@
       <form onsubmit="handleExamCallSubmit(event)" class="p-5 space-y-3.5 text-xs">
         <input type="hidden" id="logExamStudentId" />
 
-        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl flex items-center justify-between">
+        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl flex items-center justify-between gap-2">
           <div>
             <div class="text-[10px] font-bold text-indigo-600 uppercase">Exam Student</div>
             <div class="text-sm font-black text-slate-800" id="logExamStudentName">--</div>
-            <div class="text-[11px] text-slate-500" id="logExamPhone">--</div>
+            <div class="text-[11px] text-slate-500 font-mono" id="logExamPhone">--</div>
           </div>
           <div class="text-right">
             <div class="text-[10px] font-bold text-indigo-600 uppercase">Exam Dates</div>
@@ -2555,7 +2572,7 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Attendance / Confirmation Status <span class="text-rose-500">*</span></label>
+          <label class="block font-bold text-slate-700 mb-1">Attendance / Call Status <span class="text-rose-500">*</span></label>
           <select id="logExamCallStatus" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="CONFIRMED">✅ Confirmed (Will attend exam)</option>
             <option value="NOT_CALLED">⏳ Not Called Yet</option>
@@ -2567,13 +2584,21 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Calling Remarks / Hall Ticket Notes <span class="text-rose-500">*</span></label>
-          <textarea id="logExamRemarks" rows="2" required placeholder="e.g. Student confirmed, will arrive 30 mins before exam..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700"></textarea>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-bold text-slate-700">What did the student say? (Call Notes) <span class="text-rose-500">*</span></label>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            <button type="button" onclick="setExamCallQuickNote('Confirmed, will attend exam')" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold border border-emerald-200 transition">Confirmed, will attend</button>
+            <button type="button" onclick="setExamCallQuickNote('Asked to call back later')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold border border-amber-200 transition">Call back later</button>
+            <button type="button" onclick="setExamCallQuickNote('Phone switched off / Not reachable')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold border border-slate-200 transition">Switched off</button>
+            <button type="button" onclick="setExamCallQuickNote('Will not give exam this month')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-bold border border-rose-200 transition">Not giving exam</button>
+          </div>
+          <textarea id="logExamRemarks" rows="3" required placeholder="Type what the student said after call (e.g. Coming on 25 Nov, Parent said call tomorrow, Pending fee issue...)" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700"></textarea>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <button type="button" onclick="closeModal('logExamCallModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 transition">Cancel</button>
-          <button type="submit" id="btnSaveExamCall" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-xs transition">Save Exam Status</button>
+          <button type="submit" id="btnSaveExamCall" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-xs transition">Save Call Response</button>
         </div>
       </form>
     </div>
@@ -3067,14 +3092,13 @@
         const enqAssignGroup = document.getElementById('enqAssignGroup');
         if (enqAssignGroup) enqAssignGroup.classList.add('hidden');
 
-        // Hide "+ Add Enquiry" for view-only staff
-        const p = currentUser.permissions || {};
+        // All active calling staff (except Savita Owner preview) can add their own enquiries
         const sAddEnq = document.getElementById('sBtnAddEnquiry');
         if (sAddEnq) {
-          if (p.can_edit === 0 || p.can_edit === false) {
-            sAddEnq.classList.add('hidden');
-          } else {
+          if (currentUser && currentUser.username !== 'savita') {
             sAddEnq.classList.remove('hidden');
+          } else {
+            sAddEnq.classList.add('hidden');
           }
         }
 
@@ -4803,11 +4827,8 @@
 
       list.forEach(s => {
         const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
-        let statusBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Not Called</span>';
-        if (s.call_status === 'CONFIRMED') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-200">Confirmed</span>';
-        else if (s.call_status === 'ABSENT') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Absent</span>';
-        else if (s.call_status === 'CALL_BACK') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Call Back</span>';
-        else if (s.call_status === 'FEE_ISSUE') statusBadge = '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black border border-purple-200">Fee Issue</span>';
+        const altClean = (s.alt_phone || '').replace(/[^0-9]/g, '');
+        const statusBadge = getExamStatusBadge(s.call_status);
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition';
@@ -4817,7 +4838,8 @@
             <div class="text-[11px] text-slate-400">Father: ${escapeHtml(s.father_name || '--')}</div>
           </td>
           <td class="py-3 px-3">
-            <a href="tel:${phoneClean}" class="font-mono font-bold text-slate-800 hover:text-indigo-600">${escapeHtml(s.phone)}</a>
+            <a href="tel:${phoneClean}" class="font-mono font-bold text-slate-800 hover:text-indigo-600 block">${escapeHtml(s.phone)}</a>
+            ${s.alt_phone ? `<a href="tel:${altClean}" class="font-mono text-[11px] text-slate-500 hover:text-indigo-600 block">Alt: ${escapeHtml(s.alt_phone)}</a>` : ''}
           </td>
           <td class="py-3 px-3">
             <div class="font-bold text-slate-700">${escapeHtml(s.course || '--')}</div>
@@ -4833,9 +4855,25 @@
     // ----------------------------------------------------------------
     // STAFF ENQUIRIES (INDIVIDUAL QUEUE: EACH STAFF SEES OWN INQUIRIES)
     // ----------------------------------------------------------------
+    let currentStaffEnqScope = 'all';
+
+    function setStaffEnquiryScope(scope) {
+      currentStaffEnqScope = scope === 'my' ? 'my' : 'all';
+      ['all', 'my'].forEach(sc => {
+        const b = document.getElementById(`sEnqScopeBtn-${sc}`);
+        if (!b) return;
+        if (sc === currentStaffEnqScope) {
+          b.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-slate-900 shadow-xs transition';
+        } else {
+          b.className = 'px-2.5 py-1 rounded-lg font-semibold text-slate-600 hover:text-slate-900 transition';
+        }
+      });
+      loadStaffEnquiries();
+    }
+
     async function loadStaffEnquiries() {
       const search = document.getElementById('sEnqSearchInput')?.value || '';
-      const url = `/api/staff/enquiries?tab=${currentStaffEnqTab}&search=${encodeURIComponent(search)}`;
+      const url = `/api/staff/enquiries?tab=${currentStaffEnqTab}&scope=${currentStaffEnqScope}&search=${encodeURIComponent(search)}`;
       const res = await fetch(url);
       if (!res.ok) return;
       const data = await res.json();
@@ -4939,7 +4977,7 @@
               <a href="https://wa.me/91${eq.phone}?text=${waText}" target="_blank" class="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-xs flex items-center justify-center shadow-sm transition" title="WhatsApp Message">
                 <i data-lucide="message-square" class="w-4 h-4"></i>
               </a>
-              ${(currentUser && currentUser.username !== 'savita' && (!currentUser.permissions || currentUser.permissions.can_edit !== 0))
+              ${(currentUser && currentUser.username !== 'savita' && (currentUser.role === 'manager' || !eq.assigned_to || eq.assigned_to === currentUser.id || (currentUser.permissions && currentUser.permissions.can_edit !== 0)))
                 ? `
                   <button onclick="openEnquiryCallModalFromObj(${JSON.stringify(eq).replace(/"/g, '&quot;')})" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
                     <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
@@ -5102,7 +5140,12 @@
           showToast('Admission inquiry added successfully!');
           closeModal('addEnquiryModal');
           e.target.reset();
-          if (currentUser.role === 'manager') loadManagerData(); else loadStaffData();
+          if (currentUser.role === 'manager') {
+            loadManagerData();
+          } else {
+            await loadStaffData();
+            setStaffMode('enquiries');
+          }
         } else {
           showToast(data.error || 'Failed to add inquiry', false);
         }
@@ -5306,10 +5349,10 @@
               <a href="https://wa.me/91${l.phone}?text=${waText}" target="_blank" class="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-xs flex items-center justify-center shadow-xs transition" title="WhatsApp">
                 <i data-lucide="message-circle" class="w-4 h-4"></i>
               </a>
-              ${(currentUser && currentUser.username !== 'savita' && (!currentUser.permissions || currentUser.permissions.can_edit !== 0))
+              ${(currentUser && currentUser.username !== 'savita')
                 ? `<button onclick="openCallModal(${l.id})" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition">
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                    <span>Log Call</span>
+                    <span>Call Action</span>
                   </button>`
                 : ''
               }
@@ -6259,6 +6302,25 @@
       }, 250);
     }
 
+    function getExamStatusBadge(callStatus) {
+      if (callStatus === 'CONFIRMED') {
+        return '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-200 inline-flex items-center gap-1 w-fit"><i data-lucide="check" class="w-3 h-3"></i> Confirmed</span>';
+      }
+      if (callStatus === 'ABSENT') {
+        return '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Absent</span>';
+      }
+      if (callStatus === 'CALL_BACK') {
+        return '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Call Back</span>';
+      }
+      if (callStatus === 'FEE_ISSUE') {
+        return '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black border border-purple-200">Fee Issue</span>';
+      }
+      if (callStatus === 'WRONG_NUMBER') {
+        return '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 text-[10px] font-black border border-slate-300">Switched Off / Wrong</span>';
+      }
+      return '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Not Called</span>';
+    }
+
     function renderExamStudents() {
       const isMgr = currentUser && (currentUser.role === 'manager' || (currentUser.permissions && currentUser.permissions.can_edit));
       const tbody = document.getElementById(isMgr ? 'mExamTableBody' : 'sExamTableBody');
@@ -6278,6 +6340,7 @@
           (s.student_name && s.student_name.toLowerCase().includes(search)) ||
           (s.father_name && s.father_name.toLowerCase().includes(search)) ||
           (s.phone && s.phone.includes(search)) ||
+          (s.alt_phone && s.alt_phone.includes(search)) ||
           (s.course && s.course.toLowerCase().includes(search)) ||
           (s.learner_code && s.learner_code.toLowerCase().includes(search))
         );
@@ -6289,34 +6352,25 @@
       }
       if (emptyState) emptyState.classList.add('hidden');
 
-      filtered.forEach(s => {
+      filtered.forEach((s, idx) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition';
 
-        let statusBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Not Called</span>';
-        if (s.call_status === 'CONFIRMED') {
-          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-200 flex items-center gap-1 w-fit"><i data-lucide="check" class="w-3 h-3"></i> Confirmed</span>';
-        } else if (s.call_status === 'ABSENT') {
-          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">Absent</span>';
-        } else if (s.call_status === 'CALL_BACK') {
-          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-200">Call Back</span>';
-        } else if (s.call_status === 'FEE_ISSUE') {
-          statusBadge = '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black border border-purple-200">Fee Issue</span>';
-        }
-
+        const statusBadge = getExamStatusBadge(s.call_status);
         const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
+        const altClean = (s.alt_phone || '').replace(/[^0-9]/g, '');
         const waLink = `https://wa.me/91${phoneClean}`;
         const telLink = `tel:${phoneClean}`;
-        const rangeText = formatExamDateRangeText(s);
 
         tr.innerHTML = `
+          <td class="py-3 px-3 text-xs font-bold text-slate-400">${idx + 1}</td>
           <td class="py-3 px-4">
             <div class="font-black text-slate-800 text-xs">${escapeHtml(s.student_name)}</div>
-            <div class="text-[11px] text-slate-400">Father: ${escapeHtml(s.father_name || '--')}</div>
+            ${s.father_name ? `<div class="text-[11px] text-slate-400">Father: ${escapeHtml(s.father_name)}</div>` : ''}
           </td>
           <td class="py-3 px-3">
             <div class="flex items-center gap-1.5">
-              <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
+              <a href="${telLink}" class="font-mono font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
                 <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
                 <span>${escapeHtml(s.phone)}</span>
               </a>
@@ -6324,7 +6378,17 @@
                 <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
               </a>
             </div>
-            ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${escapeHtml(s.alt_phone)}</div>` : ''}
+            ${s.alt_phone ? `
+              <div class="flex items-center gap-1.5 mt-1">
+                <a href="tel:${altClean}" class="font-mono text-[11px] font-semibold text-slate-500 hover:text-indigo-600 transition flex items-center gap-1">
+                  <i data-lucide="phone-forwarded" class="w-3 h-3 text-slate-400"></i>
+                  <span>${escapeHtml(s.alt_phone)}</span>
+                </a>
+                <a href="https://wa.me/91${altClean}" target="_blank" class="p-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp 2nd No.">
+                  <i data-lucide="message-circle" class="w-3 h-3"></i>
+                </a>
+              </div>
+            ` : ''}
           </td>
           <td class="py-3 px-3">
             <div class="font-bold text-slate-700">${escapeHtml(s.course || 'Course')}</div>
@@ -6337,21 +6401,22 @@
             ${statusBadge}
           </td>
           <td class="py-3 px-4">
-            <div class="text-xs text-slate-700 font-medium">${escapeHtml(s.remarks || 'No remarks')}</div>
+            <div class="text-xs ${s.remarks ? 'text-slate-700 font-medium' : 'text-slate-400 italic'}">${escapeHtml(s.remarks || 'No notes yet')}</div>
             ${s.last_called_by ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${escapeHtml(s.last_called_by)}</div>` : ''}
           </td>
           <td class="py-3 px-4 text-right">
             <div class="flex items-center justify-end gap-1.5">
-              <button onclick="openLogExamCallModal(${s.id}, '${escapeHtml(s.student_name)}', '${escapeHtml(s.phone)}', '${escapeHtml(s.course || '')}', '${escapeHtml(rangeText)}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs">
-                <i data-lucide="phone-call" class="w-3 h-3"></i>
-                <span>Confirm</span>
+              <button onclick="openLogExamCallModal(${s.id})" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition text-[11px] inline-flex items-center gap-1 shadow-xs whitespace-nowrap">
+                <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i>
+                <span>Call Action</span>
               </button>
               ${isMgr ? `
                 <button onclick="openEditExamStudentModal(${s.id})" class="p-1.5 bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 rounded-lg transition" title="Edit Student / Exam Dates">
-                  <i data-lucide="pencil" class="w-3 h-3"></i>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="deleteExamStudent(${s.id}, '${escapeHtml(s.student_name)}')" class="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 rounded-lg transition" title="Remove from Exam List">
-                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <button onclick="deleteExamStudent(${s.id}, '${escapeHtml(s.student_name)}')" class="px-2 py-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 font-bold rounded-lg transition text-[11px] inline-flex items-center gap-1" title="Delete Student from Exam List">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>Delete</span>
                 </button>
               ` : ''}
             </div>
@@ -6527,12 +6592,33 @@
       }
     }
 
-    function openLogExamCallModal(id, studentName, phone, course, examDateRange) {
-      document.getElementById('logExamStudentId').value = id;
-      document.getElementById('logExamStudentName').innerText = studentName;
-      document.getElementById('logExamPhone').innerText = phone;
-      document.getElementById('logExamDate').innerText = examDateRange || 'Dates TBD';
+    function setExamCallQuickNote(noteText) {
+      const box = document.getElementById('logExamRemarks');
+      if (!box) return;
+      box.value = noteText;
+      box.focus();
+    }
+
+    function openLogExamCallModal(id) {
+      const s = (examStudentsList || []).find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('logExamStudentId').value = s.id;
+      document.getElementById('logExamStudentName').innerText = s.student_name || '--';
+      const phones = [s.phone, s.alt_phone].filter(Boolean).join(' / ');
+      document.getElementById('logExamPhone').innerText = phones || '--';
+      document.getElementById('logExamDate').innerText = formatExamDateRangeText(s);
+
+      const sel = document.getElementById('logExamCallStatus');
+      if (sel) {
+        sel.value = (s.call_status && s.call_status !== 'NOT_CALLED') ? s.call_status : 'CONFIRMED';
+      }
+      const rem = document.getElementById('logExamRemarks');
+      if (rem) {
+        rem.value = s.remarks || '';
+      }
+
       openModal('logExamCallModal');
+      setTimeout(() => { if (rem) rem.focus(); }, 60);
     }
 
     async function handleExamCallSubmit(e) {
