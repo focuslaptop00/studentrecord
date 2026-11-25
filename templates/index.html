@@ -221,6 +221,7 @@
       border-color: rgba(244, 63, 94, 0.35) !important;
     }
     .dark .bg-indigo-50,
+    .dark .bg-indigo-50\/70,
     .dark .bg-indigo-50\/80,
     .dark .bg-indigo-100,
     .dark .hover\:bg-indigo-100:hover {
@@ -362,7 +363,7 @@
           <button onclick="setManagerTab('exams')" id="mTabBtn-exams" class="m-tab px-4 py-2.5 rounded-xl text-xs font-bold transition text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2">
             <i data-lucide="award" class="w-4 h-4 text-indigo-500"></i>
             <span>Call for Exam Students</span>
-            <span id="mBadgeExams" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">Nov (3)</span>
+            <span id="mBadgeExams" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">0</span>
           </button>
 
           <button onclick="setManagerTab('staff')" id="mTabBtn-staff" class="m-tab px-4 py-2.5 rounded-xl text-xs font-bold transition text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-2">
@@ -690,6 +691,28 @@
 
           <!-- Main Exam Content -->
           <div class="space-y-4">
+
+            <!-- Month Exam Schedule Bar (Starting Date to Ending Date) -->
+            <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2 text-xs">
+                <i data-lucide="calendar-range" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+                <span class="font-extrabold text-indigo-950">Exam Schedule:</span>
+                <span id="mExamScheduleBadge" class="text-[11px] font-bold text-indigo-700 bg-white px-2.5 py-0.5 rounded-lg border border-indigo-200">Not set</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <div class="flex items-center gap-1.5">
+                  <label for="mExamStartDateInput" class="text-[11px] font-bold text-slate-600">Start Date:</label>
+                  <input type="date" id="mExamStartDateInput" class="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <label for="mExamEndDateInput" class="text-[11px] font-bold text-slate-600">End Date:</label>
+                  <input type="date" id="mExamEndDateInput" class="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                </div>
+                <button type="button" onclick="saveExamMonthDates()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition">
+                  Save &amp; Apply Dates
+                </button>
+              </div>
+            </div>
             
             <!-- Summary Stats Counters -->
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
@@ -751,7 +774,7 @@
                     <th class="py-3 px-4">Student & Father</th>
                     <th class="py-3 px-3">Contact</th>
                     <th class="py-3 px-3">Course / Roll No</th>
-                    <th class="py-3 px-3">Exam Date</th>
+                    <th class="py-3 px-3">Exam Dates (Start - End)</th>
                     <th class="py-3 px-3">Call Status</th>
                     <th class="py-3 px-4">Latest Remarks</th>
                     <th class="py-3 px-4 text-right">Actions</th>
@@ -840,7 +863,7 @@
           <button onclick="setStaffMode('exams')" id="sModeBtn-exams" class="s-mode-btn px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200">
             <i data-lucide="award" class="w-4 h-4 text-indigo-500"></i>
             <span>Call for Exam Students</span>
-            <span id="sBadgeExamsStaff" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">Nov (3)</span>
+            <span id="sBadgeExamsStaff" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">0</span>
           </button>
         </div>
 
@@ -1026,9 +1049,10 @@
                 <i data-lucide="award" class="w-6 h-6"></i>
               </span>
               <div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                   <h3 class="text-sm font-black text-slate-900 tracking-tight">Call for Exam Students</h3>
                   <span id="sExamActiveMonthBadge" class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">November 2026</span>
+                  <span id="sExamScheduleBadge" class="hidden px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200"></span>
                 </div>
                 <p class="text-xs text-slate-500 font-medium">Call students for upcoming exams and confirm attendance / roll numbers.</p>
               </div>
@@ -1109,7 +1133,7 @@
                     <th class="py-3 px-4">Student & Father</th>
                     <th class="py-3 px-3">Contact</th>
                     <th class="py-3 px-3">Course / Roll No</th>
-                    <th class="py-3 px-3">Exam Date</th>
+                    <th class="py-3 px-3">Exam Dates (Start - End)</th>
                     <th class="py-3 px-3">Call Status</th>
                     <th class="py-3 px-4">Latest Remarks</th>
                     <th class="py-3 px-4 text-right">Action</th>
@@ -1159,8 +1183,8 @@
         </div>
       </div>
 
-      <!-- 4 Clean Clickable Summary Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <!-- 5 Clean Clickable Summary Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <button onclick="setOwnerTab('admitted')" id="oCard-admitted" class="o-card text-left bg-white p-4 sm:p-5 rounded-3xl border-2 border-emerald-500 shadow-sm transition hover:shadow-md flex items-center justify-between gap-3">
           <div>
             <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Admitted Students</div>
@@ -1202,6 +1226,17 @@
           </div>
           <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
             <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+        </button>
+
+        <button onclick="setOwnerTab('staff')" id="oCard-staff" class="o-card col-span-2 md:col-span-1 text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Staff Activity</div>
+            <div class="text-2xl sm:text-3xl font-black text-sky-600 mt-1" id="oStatStaffCallsToday">0</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5" id="oStaffSummaryLabel">Calls logged today</div>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+            <i data-lucide="activity" class="w-6 h-6"></i>
           </div>
         </button>
       </div>
@@ -1323,7 +1358,10 @@
       <div id="oPanel-exams" class="hidden bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
           <div>
-            <h3 class="text-sm font-black text-slate-900">Monthly Exam List</h3>
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="text-sm font-black text-slate-900">Monthly Exam List</h3>
+              <span id="oExamScheduleBadge" class="hidden px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold border border-indigo-200"></span>
+            </div>
             <p class="text-xs text-slate-500">Exam calling schedule and confirmation status</p>
           </div>
           <div class="relative w-full sm:w-72">
@@ -1339,7 +1377,7 @@
                 <th class="py-3 px-4">Student &amp; Father</th>
                 <th class="py-3 px-3">Phone No.</th>
                 <th class="py-3 px-3">Course / Roll No</th>
-                <th class="py-3 px-3">Exam Date</th>
+                <th class="py-3 px-3">Exam Dates (Start - End)</th>
                 <th class="py-3 px-4">Call Status</th>
               </tr>
             </thead>
@@ -1351,6 +1389,52 @@
             <i data-lucide="award" class="w-6 h-6"></i>
           </div>
           <h4 class="text-sm font-bold text-slate-700">No exam students found</h4>
+        </div>
+      </div>
+
+      <!-- OWNER PANEL 5: STAFF ACTIVITY -->
+      <div id="oPanel-staff" class="hidden bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-sky-600"></i>
+              <span>Staff Activity &amp; Work Progress</span>
+            </h3>
+            <p class="text-xs text-slate-500">Live overview of calls made today, total calls, assigned enquiries, and admissions</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 font-bold border border-sky-200">
+              Active Staff: <span id="oStaffCountChip">0</span>
+            </span>
+            <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+              Total Calls Logged: <span id="oStaffTotalCallsChip">0</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <th class="py-3 px-4">Staff Member</th>
+                <th class="py-3 px-4">Contact</th>
+                <th class="py-3 px-4 text-center">Assigned</th>
+                <th class="py-3 px-4 text-center">Calls Today</th>
+                <th class="py-3 px-4 text-center">Total Calls</th>
+                <th class="py-3 px-4 text-center text-emerald-700 font-bold">Converted</th>
+                <th class="py-3 px-4 text-center text-rose-700">Cancelled</th>
+                <th class="py-3 px-4 text-center">Conversion %</th>
+                <th class="py-3 px-4 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody id="oStaffActivityTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          </table>
+        </div>
+        <div id="oStaffActivityEmpty" class="hidden text-center py-12">
+          <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-500 flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="users" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-700">No staff activity records found</h4>
         </div>
       </div>
 
@@ -2306,7 +2390,7 @@
     </div>
   </div>
 
-  <!-- 3. ADD EXAM STUDENT MODAL (ADMIN) -->
+  <!-- 3. ADD / EDIT EXAM STUDENT MODAL (ADMIN) -->
   <div id="addExamStudentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-200">
       <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-5 flex items-center justify-between">
@@ -2315,7 +2399,7 @@
             <i data-lucide="award" class="w-5 h-5 text-white"></i>
           </div>
           <div>
-            <h3 class="text-base font-black tracking-tight">Add Student to Exam Calling List</h3>
+            <h3 class="text-base font-black tracking-tight" id="addExamModalTitle">Add Student to Exam Calling List</h3>
             <p class="text-[11px] text-indigo-100 font-medium" id="addExamMonthSub">Target Month: November 2026</p>
           </div>
         </div>
@@ -2325,7 +2409,8 @@
       </div>
 
       <form onsubmit="handleAddExamStudentSubmit(event)" class="p-5 space-y-3.5 text-xs">
-        <div>
+        <input type="hidden" id="examEditStudentId" value="" />
+        <div id="examPickLeadContainer">
           <label class="block font-bold text-slate-700 mb-1">Pick from Admitted Students Directory</label>
           <select id="examPickLeadSelect" onchange="fillExamStudentFromLead(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="">-- Quick Select from All Students --</option>
@@ -2354,14 +2439,19 @@
           </div>
         </div>
 
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Course</label>
+          <input type="text" id="examCourse" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Course</label>
-            <input type="text" id="examCourse" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <label class="block font-bold text-slate-700 mb-1">Exam Start Date <span class="text-rose-500">*</span></label>
+            <input type="date" id="examStartDateInput" required class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Exam Date <span class="text-rose-500">*</span></label>
-            <input type="date" id="examDateInput" required class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <label class="block font-bold text-slate-700 mb-1">Exam End Date</label>
+            <input type="date" id="examEndDateInput" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
         </div>
 
@@ -2399,12 +2489,23 @@
       <form onsubmit="handleImportExamSubmit(event)" class="p-5 space-y-4 text-xs">
         <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl text-[11px] text-indigo-900 space-y-1">
           <div class="font-bold flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-indigo-600"></i> Supported Formats:</div>
-          <p class="text-indigo-700">Excel (.xlsx, .xls) or CSV files with student name, phone, course, exam date, roll no columns.</p>
+          <p class="text-indigo-700">Excel (.xlsx, .xls) or CSV with student name, phone, course, roll no, exam start date, exam end date columns.</p>
         </div>
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">Target Exam Month</label>
           <input type="text" id="importExamMonthDisplay" readonly class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 font-bold text-slate-800" value="November 2026" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Default Start Date</label>
+            <input type="date" id="importExamStartDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Default End Date</label>
+            <input type="date" id="importExamEndDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
         </div>
 
         <div>
@@ -2448,7 +2549,7 @@
             <div class="text-[11px] text-slate-500" id="logExamPhone">--</div>
           </div>
           <div class="text-right">
-            <div class="text-[10px] font-bold text-indigo-600 uppercase">Exam Date</div>
+            <div class="text-[10px] font-bold text-indigo-600 uppercase">Exam Dates</div>
             <div class="text-xs font-black text-indigo-800" id="logExamDate">--</div>
           </div>
         </div>
@@ -2764,6 +2865,7 @@
       feesStudentsList = [];
       examStudentsList = [];
       ownerAdmittedFiltered = [];
+      ownerStaffPerformance = [];
       currentDataVersion = null;
       mCurrentPage = 1;
       sCurrentPage = 1;
@@ -3054,7 +3156,7 @@
       if (document.getElementById('mBadgeEnquiries')) document.getElementById('mBadgeEnquiries').innerText = data.total_enquiries || 0;
       if (document.getElementById('mBadgeAdmitted')) document.getElementById('mBadgeAdmitted').innerText = Number(data.total_admitted_students || 1929).toLocaleString();
       if (document.getElementById('mBadgeFees')) document.getElementById('mBadgeFees').innerText = data.total_fees_pending || 0;
-      if (document.getElementById('mBadgeExams')) document.getElementById('mBadgeExams').innerText = `Nov (${data.total_exam_students || 0})`;
+      if (document.getElementById('mBadgeExams')) document.getElementById('mBadgeExams').innerText = Number(data.total_exam_students || 0).toLocaleString();
 
       const mDirCounter = document.getElementById('mDirectoryCounter');
       if (mDirCounter) mDirCounter.innerText = Number(data.total_admitted_students || 1927).toLocaleString() + ' Active Records';
@@ -3064,22 +3166,34 @@
       if (tBadge) tBadge.innerText = trashCount;
 
       const tbody = document.getElementById('mStaffPerformanceBody');
+      renderStaffActivityRowsInto(tbody, data.staff_performance || []);
+    }
+
+    function renderStaffActivityRowsInto(tbody, staffPerf, emptyEl = null) {
+      if (!tbody) return;
       tbody.innerHTML = '';
 
-      (data.staff_performance || []).forEach(s => {
+      if (!staffPerf || staffPerf.length === 0) {
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+      if (emptyEl) emptyEl.classList.add('hidden');
+
+      staffPerf.forEach(s => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition';
+        const displayName = s.name || 'Staff';
         tr.innerHTML = `
           <td class="py-3 px-4">
             <div class="font-bold text-slate-800 flex items-center gap-2">
               <span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-black flex items-center justify-center text-xs">
-                ${s.name.charAt(0)}
+                ${escapeHtml(displayName.charAt(0).toUpperCase())}
               </span>
-              <span>${s.name}</span>
+              <span>${escapeHtml(displayName)}</span>
             </div>
           </td>
           <td class="py-3 px-4 font-mono text-slate-500">
-            <div>${s.phone || 'N/A'}</div>
+            <div>${escapeHtml(s.phone || 'N/A')}</div>
           </td>
           <td class="py-3 px-4 text-center font-bold text-amber-700 bg-amber-50/40">${s.enquiries_assigned || 0}</td>
           <td class="py-3 px-4 text-center font-bold text-slate-700">${s.calls_today || 0}</td>
@@ -4371,7 +4485,7 @@
       const b4 = document.getElementById('sTabBadgeFollowup');
       if (b4) b4.innerText = data.followups_due || 0;
       if (document.getElementById('sBadgeFeesStaff')) document.getElementById('sBadgeFeesStaff').innerText = data.total_fees_pending || 0;
-      if (document.getElementById('sBadgeExamsStaff')) document.getElementById('sBadgeExamsStaff').innerText = `Nov (${data.total_exam_students || 0})`;
+      if (document.getElementById('sBadgeExamsStaff')) document.getElementById('sBadgeExamsStaff').innerText = Number(data.total_exam_students || 0).toLocaleString();
       const tfBadge = document.getElementById('tabBadgeFollowup');
       if (tfBadge) tfBadge.innerText = data.followups_due || 0;
       const tfBadgeEnq = document.getElementById('sTabBadgeFollowupEnq');
@@ -4383,6 +4497,7 @@
     // ----------------------------------------------------------------
     let currentOwnerTab = 'admitted';
     let ownerAdmittedFiltered = [];
+    let ownerStaffPerformance = [];
     let oCurrentPage = 1;
     const oPageSize = 50;
 
@@ -4392,17 +4507,19 @@
         admitted: { border: 'border-emerald-500' },
         enquiries: { border: 'border-rose-500' },
         fees: { border: 'border-amber-500' },
-        exams: { border: 'border-indigo-500' }
+        exams: { border: 'border-indigo-500' },
+        staff: { border: 'border-sky-500' }
       };
 
-      ['admitted', 'enquiries', 'fees', 'exams'].forEach(t => {
+      ['admitted', 'enquiries', 'fees', 'exams', 'staff'].forEach(t => {
         const card = document.getElementById(`oCard-${t}`);
         const panel = document.getElementById(`oPanel-${t}`);
+        const extraColSpan = t === 'staff' ? ' col-span-2 md:col-span-1' : '';
         if (t === tab) {
-          if (card) card.className = `o-card text-left bg-white p-4 sm:p-5 rounded-3xl border-2 ${meta[t].border} shadow-sm transition hover:shadow-md flex items-center justify-between gap-3`;
+          if (card) card.className = `o-card${extraColSpan} text-left bg-white p-4 sm:p-5 rounded-3xl border-2 ${meta[t].border} shadow-sm transition hover:shadow-md flex items-center justify-between gap-3`;
           if (panel) panel.classList.remove('hidden');
         } else {
-          if (card) card.className = 'o-card text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3';
+          if (card) card.className = `o-card${extraColSpan} text-left bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs transition hover:shadow-md flex items-center justify-between gap-3`;
           if (panel) panel.classList.add('hidden');
         }
       });
@@ -4411,6 +4528,7 @@
       else if (tab === 'enquiries') renderOwnerEnquiries();
       else if (tab === 'fees') renderOwnerFees();
       else if (tab === 'exams') renderOwnerExams();
+      else if (tab === 'staff') renderOwnerStaffActivity();
       lucide.createIcons();
     }
 
@@ -4420,11 +4538,12 @@
         oBody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-semibold">Loading student records...</td></tr>';
       }
       try {
-        const [statsRes, leadsRes, enqRes, feesRes] = await Promise.all([
+        const [statsRes, leadsRes, enqRes, feesRes, staffActRes] = await Promise.all([
           fetch('/api/staff/stats'),
           fetch('/api/staff/leads?tab=all'),
           fetch('/api/staff/enquiries?tab=all'),
-          fetch('/api/fees/students')
+          fetch('/api/fees/students'),
+          fetch('/api/owner/staff-activity')
         ]);
 
         if (statsRes.ok) {
@@ -4438,7 +4557,7 @@
           const xEl = document.getElementById('oStatExams');
           if (xEl) xEl.innerText = Number(st.total_exam_students || 0).toLocaleString();
           const xmEl = document.getElementById('oExamMonthLabel');
-          if (xmEl && st.current_exam_month) xmEl.innerText = `Month: ${st.current_exam_month}`;
+          if (xmEl && st.current_exam_month) xmEl.innerText = `Month: ${formatExamMonthLabel(st.current_exam_month)}`;
         }
 
         if (leadsRes.ok) {
@@ -4464,6 +4583,19 @@
           if (fEl) fEl.innerText = Number(fe.total_pending || feesStudentsList.length).toLocaleString();
         }
 
+        if (staffActRes && staffActRes.ok) {
+          const sa = await staffActRes.json();
+          ownerStaffPerformance = sa.staff_performance || [];
+          const callsEl = document.getElementById('oStatStaffCallsToday');
+          if (callsEl) callsEl.innerText = Number(sa.calls_today || 0).toLocaleString();
+          const sumEl = document.getElementById('oStaffSummaryLabel');
+          if (sumEl) sumEl.innerText = `${sa.total_staff || ownerStaffPerformance.length} staff • Calls today`;
+          const cntChip = document.getElementById('oStaffCountChip');
+          if (cntChip) cntChip.innerText = Number(ownerStaffPerformance.filter(x => x.is_active).length).toLocaleString();
+          const totChip = document.getElementById('oStaffTotalCallsChip');
+          if (totChip) totChip.innerText = Number(sa.total_calls || 0).toLocaleString();
+        }
+
         await loadExamMonths();
         await loadExamStudents();
 
@@ -4471,9 +4603,16 @@
         renderOwnerEnquiries();
         renderOwnerFees();
         renderOwnerExams();
+        renderOwnerStaffActivity();
       } catch (err) {
         console.error('Error loading Owner Preview data:', err);
       }
+    }
+
+    function renderOwnerStaffActivity() {
+      const tbody = document.getElementById('oStaffActivityTableBody');
+      const empty = document.getElementById('oStaffActivityEmpty');
+      renderStaffActivityRowsInto(tbody, ownerStaffPerformance, empty);
     }
 
     function applyOwnerAdmittedFilter() {
@@ -4684,7 +4823,7 @@
             <div class="font-bold text-slate-700">${escapeHtml(s.course || '--')}</div>
             <div class="text-[10px] font-mono text-slate-500 font-bold">${escapeHtml(s.learner_code || '--')}</div>
           </td>
-          <td class="py-3 px-3 font-bold text-indigo-700">${escapeHtml(s.exam_date || 'TBD')}</td>
+          <td class="py-3 px-3">${formatExamDateRangeHtml(s)}</td>
           <td class="py-3 px-4">${statusBadge}</td>
         `;
         tbody.appendChild(tr);
@@ -5792,9 +5931,111 @@
     let examStudentsList = [];
     let examMonthsList = [];
     let currentExamMonthCode = '2026-11';
+    let currentExamMonthMeta = { month_code: '2026-11', month_name: 'November 2026', exam_start_date: '', exam_end_date: '' };
     let currentExamFilter = 'all';
     let isExamVisibleToStaff = true;
     let examSearchTimeout = null;
+
+    function formatExamMonthLabel(code) {
+      const m = (examMonthsList || []).find(x => x.month_code === code);
+      if (m && m.month_name) return m.month_name;
+      if (!code || !/^\d{4}-\d{2}$/.test(code)) return code || 'Current Month';
+      const [y, mo] = code.split('-');
+      const d = new Date(Number(y), Number(mo) - 1, 1);
+      return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+    }
+
+    function formatShortDate(dateStr) {
+      if (!dateStr) return '';
+      const clean = String(dateStr).trim();
+      const m = clean.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return clean;
+      const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function extractExamDateBounds(item) {
+      let start = (item && item.exam_start_date ? String(item.exam_start_date).trim() : '');
+      let end = (item && item.exam_end_date ? String(item.exam_end_date).trim() : '');
+      const legacy = (item && item.exam_date ? String(item.exam_date).trim() : '');
+      if (!start && legacy) {
+        if (legacy.includes(' to ')) {
+          const parts = legacy.split(' to ');
+          start = (parts[0] || '').trim();
+          if (!end && parts[1]) end = parts[1].trim();
+        } else {
+          start = legacy;
+        }
+      }
+      return { start, end };
+    }
+
+    function formatExamDateRangeText(item) {
+      const { start, end } = extractExamDateBounds(item);
+      if (start && end && start !== end) {
+        return `${formatShortDate(start)} to ${formatShortDate(end)}`;
+      }
+      if (start) return formatShortDate(start);
+      if (end) return `Till ${formatShortDate(end)}`;
+      return 'Dates TBD';
+    }
+
+    function formatExamDateRangeHtml(item) {
+      const { start, end } = extractExamDateBounds(item);
+      if (!start && !end) {
+        return '<span class="text-xs font-semibold text-slate-400">Dates TBD</span>';
+      }
+      if (start && end && start !== end) {
+        return `
+          <div class="flex flex-col gap-0.5 whitespace-nowrap">
+            <div class="text-[11px] font-bold text-indigo-700"><span class="text-slate-400 font-semibold">Start:</span> ${escapeHtml(formatShortDate(start))}</div>
+            <div class="text-[11px] font-bold text-emerald-700"><span class="text-slate-400 font-semibold">End:</span> ${escapeHtml(formatShortDate(end))}</div>
+          </div>
+        `;
+      }
+      const single = start || end;
+      return `
+        <div class="whitespace-nowrap text-[11px] font-bold text-indigo-700">
+          <span>${escapeHtml(formatShortDate(single))}</span>
+          <div class="text-[10px] font-medium text-slate-400">End date not set</div>
+        </div>
+      `;
+    }
+
+    function updateExamScheduleUI() {
+      const monthLabel = currentExamMonthMeta.month_name || formatExamMonthLabel(currentExamMonthCode);
+      const b1 = document.getElementById('mExamActiveMonthBadge');
+      if (b1) b1.innerText = monthLabel;
+      const b2 = document.getElementById('sExamActiveMonthBadge');
+      if (b2) b2.innerText = monthLabel;
+
+      const sIn = document.getElementById('mExamStartDateInput');
+      if (sIn) sIn.value = currentExamMonthMeta.exam_start_date || '';
+      const eIn = document.getElementById('mExamEndDateInput');
+      if (eIn) eIn.value = currentExamMonthMeta.exam_end_date || '';
+
+      const rangeText = formatExamDateRangeText(currentExamMonthMeta);
+      const hasRange = Boolean(currentExamMonthMeta.exam_start_date || currentExamMonthMeta.exam_end_date);
+
+      const mSched = document.getElementById('mExamScheduleBadge');
+      if (mSched) mSched.innerText = hasRange ? rangeText : 'Not set';
+
+      ['sExamScheduleBadge', 'oExamScheduleBadge'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (hasRange) {
+          el.innerText = `Exam Dates: ${rangeText}`;
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      const xmEl = document.getElementById('oExamMonthLabel');
+      if (xmEl) {
+        xmEl.innerText = hasRange ? `${monthLabel} (${rangeText})` : `Month: ${monthLabel}`;
+      }
+    }
 
     async function loadExamMonths() {
       try {
@@ -5816,10 +6057,16 @@
           });
         }
 
-        const b1 = document.getElementById('mExamActiveMonthBadge');
-        if (b1) b1.innerText = `${currentExamMonthCode}`;
-        const b2 = document.getElementById('sExamActiveMonthBadge');
-        if (b2) b2.innerText = `${currentExamMonthCode}`;
+        const activeObj = examMonthsList.find(m => m.month_code === currentExamMonthCode);
+        if (activeObj) {
+          currentExamMonthMeta = {
+            month_code: activeObj.month_code,
+            month_name: activeObj.month_name || formatExamMonthLabel(activeObj.month_code),
+            exam_start_date: activeObj.exam_start_date || '',
+            exam_end_date: activeObj.exam_end_date || ''
+          };
+        }
+        updateExamScheduleUI();
 
         if (!data.is_admin && !data.visible) {
           isExamVisibleToStaff = false;
@@ -5880,8 +6127,52 @@
       }
     }
 
+    async function saveExamMonthDates() {
+      const startDate = document.getElementById('mExamStartDateInput')?.value || '';
+      const endDate = document.getElementById('mExamEndDateInput')?.value || '';
+      if (!startDate) {
+        showToast('Please select an Exam Start Date', false);
+        return;
+      }
+      if (endDate && endDate < startDate) {
+        showToast('Exam End Date cannot be earlier than Start Date', false);
+        return;
+      }
+      try {
+        const res = await fetch('/api/exams/settings/dates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            month_code: currentExamMonthCode,
+            month_name: currentExamMonthMeta.month_name || formatExamMonthLabel(currentExamMonthCode),
+            exam_start_date: startDate,
+            exam_end_date: endDate,
+            apply_to_students: true
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message || 'Exam schedule dates updated!');
+          await loadExamMonths();
+          await loadExamStudents(true);
+        } else {
+          showToast(data.error || 'Failed to save exam dates', false);
+        }
+      } catch (err) {
+        showToast('Network error', false);
+      }
+    }
+
     function changeExamMonth(monthCode) {
       currentExamMonthCode = monthCode;
+      const m = (examMonthsList || []).find(x => x.month_code === monthCode);
+      currentExamMonthMeta = {
+        month_code: monthCode,
+        month_name: (m && m.month_name) || formatExamMonthLabel(monthCode),
+        exam_start_date: (m && m.exam_start_date) || '',
+        exam_end_date: (m && m.exam_end_date) || ''
+      };
+      updateExamScheduleUI();
       loadExamStudents();
     }
 
@@ -5891,6 +6182,16 @@
         if (!res.ok) return;
         const data = await res.json();
         examStudentsList = data.students || [];
+
+        if (data.month_code) {
+          currentExamMonthMeta = {
+            month_code: data.month_code,
+            month_name: data.month_name || formatExamMonthLabel(data.month_code),
+            exam_start_date: data.exam_start_date || '',
+            exam_end_date: data.exam_end_date || ''
+          };
+          updateExamScheduleUI();
+        }
 
         if (data.stats) {
           const ids = ['m', 's'];
@@ -5908,10 +6209,11 @@
           });
         }
 
+        const countText = Number(examStudentsList.length).toLocaleString();
         const b1 = document.getElementById('mBadgeExams');
-        if (b1) b1.innerText = `Nov (${examStudentsList.length})`;
+        if (b1) b1.innerText = countText;
         const b2 = document.getElementById('sBadgeExamsStaff');
-        if (b2) b2.innerText = `Nov (${examStudentsList.length})`;
+        if (b2) b2.innerText = countText;
 
         renderExamStudents();
         if (currentUser && currentUser.username === 'savita') {
@@ -5993,45 +6295,49 @@
         const phoneClean = (s.phone || '').replace(/[^0-9]/g, '');
         const waLink = `https://wa.me/91${phoneClean}`;
         const telLink = `tel:${phoneClean}`;
+        const rangeText = formatExamDateRangeText(s);
 
         tr.innerHTML = `
           <td class="py-3 px-4">
-            <div class="font-black text-slate-800 text-xs">${s.student_name}</div>
-            <div class="text-[11px] text-slate-400">Father: ${s.father_name || '--'}</div>
+            <div class="font-black text-slate-800 text-xs">${escapeHtml(s.student_name)}</div>
+            <div class="text-[11px] text-slate-400">Father: ${escapeHtml(s.father_name || '--')}</div>
           </td>
           <td class="py-3 px-3">
             <div class="flex items-center gap-1.5">
               <a href="${telLink}" class="font-bold text-slate-800 hover:text-indigo-600 transition flex items-center gap-1">
                 <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500"></i>
-                <span>${s.phone}</span>
+                <span>${escapeHtml(s.phone)}</span>
               </a>
               <a href="${waLink}" target="_blank" class="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition" title="WhatsApp">
                 <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
               </a>
             </div>
-            ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${s.alt_phone}</div>` : ''}
+            ${s.alt_phone ? `<div class="text-[10px] text-slate-400">Alt: ${escapeHtml(s.alt_phone)}</div>` : ''}
           </td>
           <td class="py-3 px-3">
-            <div class="font-bold text-slate-700">${s.course || 'Course'}</div>
-            <div class="text-[10px] font-mono text-slate-500 font-bold">${s.learner_code || '--'}</div>
+            <div class="font-bold text-slate-700">${escapeHtml(s.course || 'Course')}</div>
+            <div class="text-[10px] font-mono text-slate-500 font-bold">${escapeHtml(s.learner_code || '--')}</div>
           </td>
-          <td class="py-3 px-3 font-bold text-indigo-700 text-xs">
-            ${s.exam_date || 'TBD'}
+          <td class="py-3 px-3">
+            ${formatExamDateRangeHtml(s)}
           </td>
           <td class="py-3 px-3">
             ${statusBadge}
           </td>
           <td class="py-3 px-4">
-            <div class="text-xs text-slate-700 font-medium">${s.remarks || 'No remarks'}</div>
-            ${s.last_called_by ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${s.last_called_by}</div>` : ''}
+            <div class="text-xs text-slate-700 font-medium">${escapeHtml(s.remarks || 'No remarks')}</div>
+            ${s.last_called_by ? `<div class="text-[10px] text-slate-400 mt-0.5">Caller: ${escapeHtml(s.last_called_by)}</div>` : ''}
           </td>
           <td class="py-3 px-4 text-right">
             <div class="flex items-center justify-end gap-1.5">
-              <button onclick="openLogExamCallModal(${s.id}, '${escapeHtml(s.student_name)}', '${s.phone}', '${escapeHtml(s.course || '')}', '${s.exam_date || ''}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs">
+              <button onclick="openLogExamCallModal(${s.id}, '${escapeHtml(s.student_name)}', '${escapeHtml(s.phone)}', '${escapeHtml(s.course || '')}', '${escapeHtml(rangeText)}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition text-[11px] flex items-center gap-1 shadow-xs">
                 <i data-lucide="phone-call" class="w-3 h-3"></i>
                 <span>Confirm</span>
               </button>
               ${isMgr ? `
+                <button onclick="openEditExamStudentModal(${s.id})" class="p-1.5 bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 rounded-lg transition" title="Edit Student / Exam Dates">
+                  <i data-lucide="pencil" class="w-3 h-3"></i>
+                </button>
                 <button onclick="deleteExamStudent(${s.id}, '${escapeHtml(s.student_name)}')" class="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 rounded-lg transition" title="Remove from Exam List">
                   <i data-lucide="trash-2" class="w-3 h-3"></i>
                 </button>
@@ -6045,6 +6351,22 @@
     }
 
     function openAddExamStudentModal(leadId = null, name = '') {
+      document.getElementById('examEditStudentId').value = '';
+      document.getElementById('addExamModalTitle').innerText = 'Add Student to Exam Calling List';
+      document.getElementById('btnSubmitAddExamStudent').innerText = 'Add to Exam List';
+      document.getElementById('addExamMonthSub').innerText = `Target Month: ${currentExamMonthMeta.month_name || formatExamMonthLabel(currentExamMonthCode)}`;
+      const pickWrap = document.getElementById('examPickLeadContainer');
+      if (pickWrap) pickWrap.classList.remove('hidden');
+
+      document.getElementById('examStudentName').value = '';
+      document.getElementById('examFatherName').value = '';
+      document.getElementById('examPhone').value = '';
+      document.getElementById('examLearnerCode').value = '';
+      document.getElementById('examCourse').value = '';
+      document.getElementById('examStartDateInput').value = currentExamMonthMeta.exam_start_date || '';
+      document.getElementById('examEndDateInput').value = currentExamMonthMeta.exam_end_date || '';
+      document.getElementById('examRemarksInput').value = '';
+
       const select = document.getElementById('examPickLeadSelect');
       if (select) {
         select.innerHTML = '<option value="">-- Quick Select from All Students --</option>';
@@ -6056,6 +6378,31 @@
           select.appendChild(opt);
         });
       }
+      if (leadId) fillExamStudentFromLead(leadId);
+      openModal('addExamStudentModal');
+    }
+
+    function openEditExamStudentModal(studentId) {
+      const s = (examStudentsList || []).find(x => x.id === studentId);
+      if (!s) return;
+      const { start, end } = extractExamDateBounds(s);
+
+      document.getElementById('examEditStudentId').value = s.id;
+      document.getElementById('addExamModalTitle').innerText = 'Edit Exam Student & Dates';
+      document.getElementById('btnSubmitAddExamStudent').innerText = 'Save Changes';
+      document.getElementById('addExamMonthSub').innerText = `Month: ${s.month_name || formatExamMonthLabel(s.month_code || currentExamMonthCode)}`;
+      const pickWrap = document.getElementById('examPickLeadContainer');
+      if (pickWrap) pickWrap.classList.add('hidden');
+
+      document.getElementById('examStudentName').value = s.student_name || '';
+      document.getElementById('examFatherName').value = s.father_name || '';
+      document.getElementById('examPhone').value = s.phone || '';
+      document.getElementById('examLearnerCode').value = s.learner_code || '';
+      document.getElementById('examCourse').value = s.course || '';
+      document.getElementById('examStartDateInput').value = start || '';
+      document.getElementById('examEndDateInput').value = end || '';
+      document.getElementById('examRemarksInput').value = s.remarks || '';
+
       openModal('addExamStudentModal');
     }
 
@@ -6072,58 +6419,60 @@
 
     async function handleAddExamStudentSubmit(e) {
       e.preventDefault();
+      const editId = (document.getElementById('examEditStudentId')?.value || '').trim();
+      const startDate = document.getElementById('examStartDateInput').value;
+      const endDate = document.getElementById('examEndDateInput').value;
+
+      if (startDate && endDate && endDate < startDate) {
+        showToast('Exam End Date cannot be earlier than Exam Start Date', false);
+        return;
+      }
+
       const payload = {
         month_code: currentExamMonthCode,
+        month_name: currentExamMonthMeta.month_name || formatExamMonthLabel(currentExamMonthCode),
         student_name: document.getElementById('examStudentName').value,
         father_name: document.getElementById('examFatherName').value,
         phone: document.getElementById('examPhone').value,
         learner_code: document.getElementById('examLearnerCode').value,
         course: document.getElementById('examCourse').value,
-        exam_date: document.getElementById('examDateInput').value,
+        exam_start_date: startDate,
+        exam_end_date: endDate,
         remarks: document.getElementById('examRemarksInput').value
       };
 
+      const url = editId ? `/api/exams/students/${editId}/update` : '/api/exams/students/add';
+
       try {
-        const res = await fetch('/api/exams/students/add', {
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok) {
-          showToast(data.message || 'Added to exam list!');
+          showToast(data.message || (editId ? 'Exam details updated!' : 'Added to exam list!'));
           closeModal('addExamStudentModal');
           loadExamStudents(true);
         } else {
-          showToast(data.error || 'Failed to add', false);
+          showToast(data.error || 'Failed to save', false);
         }
       } catch (err) {
         showToast('Network error', false);
       }
     }
 
-    async function quickAddLeadToExam(leadId, studentName) {
-      const examDate = prompt(`Enter exam date for student '${studentName}':`, new Date().toISOString().split('T')[0]);
-      if (!examDate) return;
-      try {
-        const res = await fetch('/api/exams/students/add-from-leads', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lead_id: leadId, month_code: currentExamMonthCode, exam_date: examDate })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          showToast(data.message || 'Added to exam list!');
-          loadExamStudents(true);
-        } else {
-          showToast(data.error || 'Failed to add', false);
-        }
-      } catch (err) {
-        showToast('Network error', false);
-      }
+    function quickAddLeadToExam(leadId, studentName) {
+      openAddExamStudentModal(leadId, studentName);
     }
 
     function openImportExamModal() {
+      const disp = document.getElementById('importExamMonthDisplay');
+      if (disp) disp.value = currentExamMonthMeta.month_name || formatExamMonthLabel(currentExamMonthCode);
+      const sIn = document.getElementById('importExamStartDate');
+      if (sIn) sIn.value = currentExamMonthMeta.exam_start_date || '';
+      const eIn = document.getElementById('importExamEndDate');
+      if (eIn) eIn.value = currentExamMonthMeta.exam_end_date || '';
       openModal('importExamModal');
     }
 
@@ -6134,9 +6483,19 @@
         showToast('Please select a file', false);
         return;
       }
+      const startDate = document.getElementById('importExamStartDate')?.value || '';
+      const endDate = document.getElementById('importExamEndDate')?.value || '';
+      if (startDate && endDate && endDate < startDate) {
+        showToast('Exam End Date cannot be earlier than Start Date', false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', fileInput.files[0]);
       formData.append('month_code', currentExamMonthCode);
+      formData.append('month_name', currentExamMonthMeta.month_name || formatExamMonthLabel(currentExamMonthCode));
+      if (startDate) formData.append('exam_start_date', startDate);
+      if (endDate) formData.append('exam_end_date', endDate);
 
       try {
         const res = await fetch('/api/exams/students/import', {
@@ -6156,11 +6515,11 @@
       }
     }
 
-    function openLogExamCallModal(id, studentName, phone, course, examDate) {
+    function openLogExamCallModal(id, studentName, phone, course, examDateRange) {
       document.getElementById('logExamStudentId').value = id;
       document.getElementById('logExamStudentName').innerText = studentName;
       document.getElementById('logExamPhone').innerText = phone;
-      document.getElementById('logExamDate').innerText = examDate || 'TBD';
+      document.getElementById('logExamDate').innerText = examDateRange || 'Dates TBD';
       openModal('logExamCallModal');
     }
 
