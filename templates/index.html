@@ -2753,6 +2753,22 @@
 
     function showLoginScreen() {
       currentUser = null;
+      // Clear cached user data when returning to login screen so switching accounts loads cleanly
+      rawManagerLeads = [];
+      managerLeads = [];
+      rawManagerEnquiries = [];
+      managerEnquiries = [];
+      rawStaffLeads = [];
+      staffLeads = [];
+      staffEnquiries = [];
+      feesStudentsList = [];
+      examStudentsList = [];
+      ownerAdmittedFiltered = [];
+      currentDataVersion = null;
+      mCurrentPage = 1;
+      sCurrentPage = 1;
+      oCurrentPage = 1;
+
       document.getElementById('loginSection').classList.remove('hidden');
       document.getElementById('managerSection').classList.add('hidden');
       document.getElementById('staffSection').classList.add('hidden');
@@ -3435,9 +3451,16 @@
     }
 
     let rawManagerLeads = [];
+    let _loadingManagerLeads = false;
 
     async function loadManagerLeads(forceFetch = false) {
+      if (_loadingManagerLeads && !forceFetch) return;
       if (!rawManagerLeads || rawManagerLeads.length === 0 || forceFetch) {
+        _loadingManagerLeads = true;
+        const tbody = document.getElementById('mLeadsTableBody');
+        if (tbody && rawManagerLeads.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-400 font-semibold">Loading student records...</td></tr>';
+        }
         try {
           const res = await fetch('/api/manager/leads');
           if (!res.ok) return;
@@ -3450,6 +3473,8 @@
           populateDropdowns('mFilterCourse', data.available_courses, 'All Courses', currentCourse);
         } catch (err) {
           console.error('Error fetching manager leads:', err);
+        } finally {
+          _loadingManagerLeads = false;
         }
       }
 
@@ -4390,6 +4415,10 @@
     }
 
     async function loadOwnerPreviewData() {
+      const oBody = document.getElementById('oAdmittedTableBody');
+      if (oBody && (!rawStaffLeads || rawStaffLeads.length === 0)) {
+        oBody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-semibold">Loading student records...</td></tr>';
+      }
       try {
         const [statsRes, leadsRes, enqRes, feesRes] = await Promise.all([
           fetch('/api/staff/stats'),
@@ -4956,11 +4985,18 @@
     }
 
     let rawStaffLeads = [];
+    let _loadingStaffLeads = false;
     let sCurrentPage = 1;
     const sPageSize = 50;
 
     async function loadStaffLeads(forceFetch = false) {
+      if (_loadingStaffLeads && !forceFetch) return;
       if (!rawStaffLeads || rawStaffLeads.length === 0 || forceFetch) {
+        _loadingStaffLeads = true;
+        const container = document.getElementById('staffLeadsList');
+        if (container && rawStaffLeads.length === 0) {
+          container.innerHTML = '<div class="text-center py-10 text-xs text-slate-400 font-semibold">Loading student records...</div>';
+        }
         try {
           const res = await fetch(`/api/staff/leads?tab=all`);
           if (!res.ok) return;
@@ -4973,6 +5009,8 @@
           populateDropdowns('sFilterCourse', data.available_courses, 'All Courses', currentCourse);
         } catch (err) {
           console.error('Error fetching staff leads:', err);
+        } finally {
+          _loadingStaffLeads = false;
         }
       }
 
