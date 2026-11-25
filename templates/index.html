@@ -61,15 +61,28 @@
     }
     .dark .bg-slate-50,
     .dark .bg-slate-50\/50,
-    .dark .bg-slate-50\/80 {
+    .dark .bg-slate-50\/70,
+    .dark .bg-slate-50\/80,
+    .dark .bg-slate-50\/95 {
       background-color: #0f172a !important;
     }
-    .dark .bg-slate-100 {
+    .dark .bg-slate-100,
+    .dark .bg-slate-100\/70,
+    .dark .bg-slate-100\/80 {
       background-color: #1a253c !important;
       color: #cbd5e1 !important;
     }
-    .dark .bg-slate-200 {
+    .dark .bg-slate-200,
+    .dark .bg-slate-300 {
       background-color: #243049 !important;
+    }
+    .dark .hover\:bg-slate-50:hover,
+    .dark .hover\:bg-slate-50\/80:hover,
+    .dark .hover\:bg-slate-100:hover,
+    .dark .hover\:bg-slate-200:hover,
+    .dark .hover\:bg-slate-300:hover,
+    .dark .hover\:bg-white:hover {
+      background-color: #1e2b45 !important;
     }
     .dark .text-slate-900,
     .dark .text-slate-800 {
@@ -82,6 +95,51 @@
     .dark .text-slate-500,
     .dark .text-slate-400 {
       color: #94a3b8 !important;
+    }
+    .dark .text-amber-600,
+    .dark .text-amber-700,
+    .dark .text-amber-800,
+    .dark .text-amber-900 {
+      color: #fbbf24 !important;
+    }
+    .dark .text-emerald-600,
+    .dark .text-emerald-700,
+    .dark .text-emerald-800 {
+      color: #34d399 !important;
+    }
+    .dark .text-rose-600,
+    .dark .text-rose-700,
+    .dark .text-rose-800 {
+      color: #fb7185 !important;
+    }
+    .dark .text-indigo-600,
+    .dark .text-indigo-700,
+    .dark .text-indigo-800,
+    .dark .text-indigo-900 {
+      color: #818cf8 !important;
+    }
+    .dark .text-sky-700,
+    .dark .text-sky-800 {
+      color: #38bdf8 !important;
+    }
+    .dark .text-purple-700,
+    .dark .text-purple-800 {
+      color: #c084fc !important;
+    }
+    .dark .text-blue-800 {
+      color: #60a5fa !important;
+    }
+    .dark .text-orange-700,
+    .dark .text-orange-800 {
+      color: #fb923c !important;
+    }
+    /* Keep dark text legible inside bright solid pills in dark mode */
+    .dark .bg-amber-400,
+    .dark .bg-amber-300,
+    .dark .bg-emerald-300,
+    .dark .bg-sky-300,
+    .dark .bg-indigo-300 {
+      color: #0f172a !important;
     }
     .dark .border-slate-100,
     .dark .border-slate-200,
@@ -136,40 +194,63 @@
 
     /* Badges & Indicators in Dark Mode */
     .dark .bg-amber-50,
-    .dark .bg-amber-100 {
+    .dark .bg-amber-50\/40,
+    .dark .bg-amber-50\/70,
+    .dark .bg-amber-50\/80,
+    .dark .bg-amber-100,
+    .dark .hover\:bg-amber-100:hover {
       background-color: rgba(245, 158, 11, 0.18) !important;
       color: #fde68a !important;
       border-color: rgba(245, 158, 11, 0.35) !important;
     }
     .dark .bg-emerald-50,
-    .dark .bg-emerald-100 {
+    .dark .bg-emerald-50\/50,
+    .dark .bg-emerald-100,
+    .dark .hover\:bg-emerald-100:hover {
       background-color: rgba(16, 185, 129, 0.18) !important;
       color: #a7f3d0 !important;
       border-color: rgba(16, 185, 129, 0.35) !important;
     }
     .dark .bg-rose-50,
-    .dark .bg-rose-100 {
+    .dark .bg-rose-50\/40,
+    .dark .bg-rose-100,
+    .dark .hover\:bg-rose-50:hover,
+    .dark .hover\:bg-rose-100:hover {
       background-color: rgba(244, 63, 94, 0.18) !important;
       color: #fecdd3 !important;
       border-color: rgba(244, 63, 94, 0.35) !important;
     }
     .dark .bg-indigo-50,
-    .dark .bg-indigo-100 {
+    .dark .bg-indigo-50\/80,
+    .dark .bg-indigo-100,
+    .dark .hover\:bg-indigo-100:hover {
       background-color: rgba(99, 102, 241, 0.18) !important;
       color: #c7d2fe !important;
       border-color: rgba(99, 102, 241, 0.35) !important;
     }
     .dark .bg-sky-50,
-    .dark .bg-sky-100 {
+    .dark .bg-sky-100,
+    .dark .hover\:bg-sky-100:hover {
       background-color: rgba(14, 165, 233, 0.18) !important;
       color: #bae6fd !important;
       border-color: rgba(14, 165, 233, 0.35) !important;
     }
     .dark .bg-purple-50,
-    .dark .bg-purple-100 {
+    .dark .bg-purple-100,
+    .dark .hover\:bg-purple-100:hover {
       background-color: rgba(168, 85, 247, 0.18) !important;
       color: #e9d5ff !important;
       border-color: rgba(168, 85, 247, 0.35) !important;
+    }
+    .dark .bg-blue-100 {
+      background-color: rgba(59, 130, 246, 0.18) !important;
+      color: #bfdbfe !important;
+      border-color: rgba(59, 130, 246, 0.35) !important;
+    }
+    .dark .bg-orange-100 {
+      background-color: rgba(249, 115, 22, 0.18) !important;
+      color: #fed7aa !important;
+      border-color: rgba(249, 115, 22, 0.35) !important;
     }
   </style>
 </head>
@@ -929,34 +1010,15 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div class="flex items-center gap-3">
               <span class="p-2.5 rounded-2xl bg-amber-50 text-amber-600">
-                <i data-lucide="wallet" class="w-6 h-6"></i>
+                <i data-lucide="phone-call" class="w-6 h-6"></i>
               </span>
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Pending Calling List</h3>
+                  <h3 class="text-sm font-black text-slate-900 tracking-tight">Fees Calling List</h3>
                   <span id="sFeesCountBadge" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black border border-amber-200">0 Students</span>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">Call these students for pending fee payments and record calling remarks.</p>
+                <p class="text-xs text-slate-500 font-medium">Call these students regarding fees and record calling remarks.</p>
               </div>
-            </div>
-          </div>
-
-          <!-- Filter & Search Toolbar -->
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap gap-1.5">
-              <button onclick="setFeeFilter('all')" id="sFeeFilterBtn-all" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-xs">
-                All Pending
-              </button>
-              <button onclick="setFeeFilter('overdue')" id="sFeeFilterBtn-overdue" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-                <span>Overdue</span>
-                <span id="sBadgeFeeOverdue" class="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
-              </button>
-              <button onclick="setFeeFilter('today')" id="sFeeFilterBtn-today" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                Due Today
-              </button>
-              <button onclick="setFeeFilter('upcoming')" id="sFeeFilterBtn-upcoming" class="s-fee-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                Upcoming
-              </button>
             </div>
             <div class="relative w-full sm:w-72">
               <input type="text" id="sFeeSearchInput" oninput="debounceFeesSearch()" placeholder="Search name, phone, course..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition" />
@@ -964,7 +1026,7 @@
             </div>
           </div>
 
-          <!-- Fees Table (Staff View) -->
+          <!-- Fees Table (Staff View - Simple Calling Data Only, NO Pending Amount) -->
           <div class="overflow-x-auto border border-slate-100 rounded-2xl">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
@@ -972,7 +1034,6 @@
                   <th class="py-3 px-4">Student & Father</th>
                   <th class="py-3 px-3">Contact</th>
                   <th class="py-3 px-3">Course / Batch</th>
-                  <th class="py-3 px-3">Pending Amount</th>
                   <th class="py-3 px-3">Due Date</th>
                   <th class="py-3 px-4">Latest Calling Remark</th>
                   <th class="py-3 px-4 text-right">Action</th>
@@ -985,10 +1046,10 @@
           </div>
           <div id="sFeesEmptyState" class="hidden text-center py-12">
             <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3">
-              <i data-lucide="wallet" class="w-6 h-6"></i>
+              <i data-lucide="phone-call" class="w-6 h-6"></i>
             </div>
-            <h4 class="text-sm font-bold text-slate-700">No students currently have pending fees</h4>
-            <p class="text-xs text-slate-400 mt-1">Admin will assign students here when fees are due.</p>
+            <h4 class="text-sm font-bold text-slate-700">No students to call right now</h4>
+            <p class="text-xs text-slate-400 mt-1">Admin will assign students here when calling is needed.</p>
           </div>
         </div>
       </div>
@@ -2043,7 +2104,7 @@
             <div class="text-sm font-black text-slate-800" id="logFeeStudentName">--</div>
             <div class="text-[11px] text-slate-500" id="logFeePhone">--</div>
           </div>
-          <div class="text-right">
+          <div class="text-right" id="logFeeAmountBox">
             <div class="text-[10px] font-bold text-amber-600 uppercase">Pending Amount</div>
             <div class="text-base font-black text-amber-800" id="logFeeAmount">₹0</div>
           </div>
@@ -2329,6 +2390,8 @@
     // ==========================================
     // THEME SWITCHER & PERMANENT DEFAULT ENGINE
     // ==========================================
+    let _themeToggledBeforeLogin = false;
+
     function getSavedTheme() {
       return localStorage.getItem('focus_theme_preference') || 'light';
     }
@@ -2360,16 +2423,39 @@
 
     function setTheme(theme, saveAsDefault = true) {
       updateThemeUI(theme);
+      localStorage.setItem('focus_theme_preference', theme);
       if (saveAsDefault) {
-        localStorage.setItem('focus_theme_preference', theme);
         if (currentUser && currentUser.id) {
           fetch('/api/me/theme', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ theme: theme })
           }).catch(e => console.log('Theme sync error:', e));
+          currentUser.theme_preference = theme;
+        } else {
+          _themeToggledBeforeLogin = true;
         }
-        showToast(`Theme changed to ${theme.toUpperCase()} (Saved as default)`);
+        showToast(`Theme changed to ${theme.toUpperCase()} (Saved as your default)`);
+      }
+    }
+
+    function applyUserThemeOnLogin(isFreshLogin = false) {
+      if (isFreshLogin && _themeToggledBeforeLogin) {
+        const chosen = getSavedTheme();
+        _themeToggledBeforeLogin = false;
+        if (currentUser && currentUser.id) {
+          fetch('/api/me/theme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ theme: chosen })
+          }).catch(e => console.log('Theme sync error:', e));
+          currentUser.theme_preference = chosen;
+        }
+        updateThemeUI(chosen);
+      } else if (currentUser && currentUser.theme_preference) {
+        setTheme(currentUser.theme_preference, false);
+      } else {
+        updateThemeUI(getSavedTheme());
       }
     }
 
@@ -2448,7 +2534,7 @@
           }
           if (panel) panel.classList.remove('hidden');
 
-          if (m === 'fees') loadFeesStudents();
+          if (m === 'fees') { currentFeeFilter = 'all'; loadFeesStudents(); }
           else if (m === 'exams') { loadExamMonths(); loadExamStudents(); }
           else if (m === 'enquiries') loadStaffEnquiries();
           else loadStaffLeads();
@@ -2490,14 +2576,7 @@
         const data = await res.json();
         if (data.authenticated) {
           currentUser = data.user;
-          if (currentUser && currentUser.theme_preference) {
-            const localTheme = localStorage.getItem('focus_theme_preference');
-            if (!localTheme) {
-              setTheme(currentUser.theme_preference, false);
-            } else {
-              updateThemeUI(localTheme);
-            }
-          }
+          applyUserThemeOnLogin(false);
           setupAuthenticatedView();
         } else {
           showLoginScreen();
@@ -2543,14 +2622,7 @@
         }
 
         currentUser = data.user;
-        if (currentUser && currentUser.theme_preference) {
-          const localTheme = localStorage.getItem('focus_theme_preference');
-          if (!localTheme) {
-            setTheme(currentUser.theme_preference, false);
-          } else {
-            updateThemeUI(localTheme);
-          }
-        }
+        applyUserThemeOnLogin(true);
         setupAuthenticatedView();
         showToast(`Welcome, ${currentUser.name}!`);
       } catch (err) {
@@ -4873,7 +4945,7 @@
     }
 
     function renderFeesStudents() {
-      const isRealManager = currentUser && currentUser.role === 'manager';
+      const isRealManager = currentUser && currentUser.role === 'manager' && currentUser.username !== 'savita';
 
       // 1. Render Manager Table (if present and user is manager)
       const mBody = document.getElementById('mFeesTableBody');
@@ -4882,7 +4954,7 @@
         renderFeesRowsInto(mBody, mEmpty, true, 'mFeeSearchInput');
       }
 
-      // 2. Render Staff Table (for Staff, Madam Savita, or staff view)
+      // 2. Render Staff Table (for Staff, Madam Savita, or staff view - NO Pending Amount shown)
       const sBody = document.getElementById('sFeesTableBody');
       const sEmpty = document.getElementById('sFeesEmptyState');
       if (sBody) {
@@ -4933,8 +5005,14 @@
         const waLink = `https://wa.me/91${phoneClean}`;
         const telLink = `tel:${phoneClean}`;
 
+        let pendingAmountCol = '';
         let actionHtml = '';
         if (isManagerMode) {
+          pendingAmountCol = `
+            <td class="py-3 px-3 font-black text-amber-700 text-xs">
+              ${s.fee_pending_amount || 'Pending'}
+            </td>
+          `;
           // Manager actions: Call Log, Paid, Edit
           actionHtml = `
             <div class="flex items-center justify-end gap-1.5">
@@ -4952,10 +5030,10 @@
             </div>
           `;
         } else {
-          // Staff calling view: PURE CALLING ACTION ONLY (NO paid button, NO edit button)
+          // Staff calling view: PURE CALLING ACTION ONLY (NO pending amount, NO paid button, NO edit button)
           actionHtml = `
             <div class="flex items-center justify-end">
-              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '${escapeHtml(s.fee_pending_amount || '')}')" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition text-xs flex items-center gap-1.5 shadow-xs" title="Call student and record remark">
+              <button onclick="openLogFeeCallModal(${s.id}, '${escapeHtml(s.name)}', '${s.phone}', '')" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition text-xs flex items-center gap-1.5 shadow-xs" title="Call student and record remark">
                 <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
                 <span>Call / Add Remark</span>
               </button>
@@ -4984,9 +5062,7 @@
             <div class="font-bold text-slate-700">${s.course || 'Course'}</div>
             <div class="text-[10px] text-slate-400 font-medium">${s.batch || 'Batch'}</div>
           </td>
-          <td class="py-3 px-3 font-black text-amber-700 text-xs">
-            ${s.fee_pending_amount || 'Pending'}
-          </td>
+          ${pendingAmountCol}
           <td class="py-3 px-3">
             ${dueDateBadge}
           </td>
@@ -5075,11 +5151,20 @@
       document.getElementById('logFeeLeadId').value = leadId;
       document.getElementById('logFeeStudentName').innerText = studentName;
       document.getElementById('logFeePhone').innerText = phone;
-      document.getElementById('logFeeAmount').innerText = amount || 'Pending';
       document.getElementById('logFeeRemarks').value = '';
       document.getElementById('logFeeFollowupDate').value = '';
 
-      const isRealManager = currentUser && currentUser.role === 'manager';
+      const isRealManager = currentUser && currentUser.role === 'manager' && currentUser.username !== 'savita';
+      const amountBox = document.getElementById('logFeeAmountBox');
+      const amountEl = document.getElementById('logFeeAmount');
+      if (isRealManager) {
+        if (amountBox) amountBox.classList.remove('hidden');
+        if (amountEl) amountEl.innerText = amount || 'Pending';
+      } else {
+        if (amountBox) amountBox.classList.add('hidden');
+        if (amountEl) amountEl.innerText = '';
+      }
+
       const statusSelect = document.getElementById('logFeeCallStatus');
       if (statusSelect) {
         if (isRealManager) {
@@ -5109,7 +5194,7 @@
       const subEl = document.getElementById('logFeeModalSub');
       if (!isRealManager) {
         if (titleEl) titleEl.innerText = 'Call Student & Record Remark';
-        if (subEl) subEl.innerText = 'Call student regarding pending fee and save calling outcome.';
+        if (subEl) subEl.innerText = 'Call student regarding fee follow-up and save calling outcome.';
       } else {
         if (titleEl) titleEl.innerText = 'Fee Calling Remarks';
         if (subEl) subEl.innerText = 'Record call outcome & payment promise';
@@ -5124,9 +5209,10 @@
       const status = document.getElementById('logFeeCallStatus').value;
       const followupDate = document.getElementById('logFeeFollowupDate').value;
       const remarks = document.getElementById('logFeeRemarks').value;
+      const isRealManager = currentUser && currentUser.role === 'manager' && currentUser.username !== 'savita';
 
       try {
-        if (status === 'PAID') {
+        if (status === 'PAID' && isRealManager) {
           await fetch('/api/fees/mark-paid', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
