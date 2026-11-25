@@ -1528,7 +1528,8 @@
         </a>
       </div>
 
-      <form onsubmit="handleCallSubmit(event)" class="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+      <form onsubmit="handleCallSubmit(event)" class="flex flex-col flex-1 min-h-0">
+        <div class="p-5 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar">
         <input type="hidden" id="cModalLeadId" />
 
         <!-- Status Selector for Admitted Students -->
@@ -1559,6 +1560,10 @@
               <input type="radio" name="callStatus" value="SWITCHED_OFF" onchange="toggleFollowupDate()" required class="text-indigo-600" />
               <span class="font-medium text-slate-600">Switched Off</span>
             </label>
+            <label class="col-span-2 border border-slate-200 p-2.5 rounded-xl cursor-pointer hover:bg-slate-50 flex items-center gap-2">
+              <input type="radio" name="callStatus" value="OTHER" onchange="toggleFollowupDate()" required class="text-purple-600" />
+              <span class="font-semibold text-purple-700">Other (Mention details in notes below)</span>
+            </label>
           </div>
         </div>
 
@@ -1572,18 +1577,23 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Discussion Remarks / Notes *</label>
-          <textarea id="cModalRemarks" required rows="3" placeholder="Enter discussion summary (e.g. Informed regarding exam date, or fee payment promised by Monday...)" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        <div id="otherOutcomeHint" class="hidden p-2.5 bg-purple-50 border border-purple-200 rounded-xl text-[11px] font-semibold text-purple-800">
+          Selected Other: Please mention what was discussed with the student/parent in Discussion Remarks below.
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Previous Call History</label>
-          <div id="cModalHistory" class="space-y-2 max-h-36 overflow-y-auto pr-1 text-xs"></div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1" id="cModalRemarksLabel">Discussion Remarks / Notes *</label>
+          <textarea id="cModalRemarks" required rows="3" placeholder="Enter discussion summary (e.g. Informed regarding exam date, fee promised by Monday, or any other detail...)" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
         </div>
 
-        <div class="pt-2">
-          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Previous Call History</label>
+          <div id="cModalHistory" class="space-y-2 max-h-28 overflow-y-auto pr-1 text-xs"></div>
+        </div>
+        </div>
+
+        <div class="p-4 pt-2 border-t border-slate-100 bg-white shrink-0">
+          <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition text-xs">
             Save Calling Remarks
           </button>
         </div>
@@ -1957,6 +1967,10 @@
             <label class="border border-slate-200 p-2.5 rounded-xl cursor-pointer hover:bg-slate-50 flex items-center gap-2">
               <input type="radio" name="eqCallStatus" value="ADMISSION_DONE" onchange="toggleEqFollowupDate()" class="text-emerald-600" />
               <span class="font-bold text-emerald-700">Admission Done</span>
+            </label>
+            <label class="col-span-2 border border-slate-200 p-2.5 rounded-xl cursor-pointer hover:bg-slate-50 flex items-center gap-2">
+              <input type="radio" name="eqCallStatus" value="OTHER" onchange="toggleEqFollowupDate()" class="text-purple-600" />
+              <span class="font-semibold text-purple-700">Other (Mention details in remarks below)</span>
             </label>
           </div>
         </div>
@@ -2580,6 +2594,7 @@
             <option value="CALL_BACK">🔁 Call Back Later</option>
             <option value="FEE_ISSUE">⚠️ Fee Issue / Cannot pay exam fee</option>
             <option value="WRONG_NUMBER">📵 Switched Off / Wrong Number</option>
+            <option value="OTHER">📝 Other (Mention in notes below)</option>
           </select>
         </div>
 
@@ -5161,7 +5176,8 @@
         'VISIT_SCHEDULED': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-indigo-100 text-indigo-800">DEMO / VISIT</span>',
         'ADMISSION_DONE': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-800">ADMITTED</span>',
         'CANCELLED': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-rose-100 text-rose-800">CANCELLED</span>',
-        'RINGING': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-100 text-slate-700">RINGING</span>'
+        'RINGING': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-100 text-slate-700">RINGING</span>',
+        'OTHER': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-purple-100 text-purple-800">OTHER</span>'
       };
       return map[status] || `<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-100 text-slate-700">${status}</span>`;
     }
@@ -5456,10 +5472,27 @@
     function toggleFollowupDate() {
       const selected = document.querySelector('input[name="callStatus"]:checked');
       const container = document.getElementById('followupDateContainer');
+      const otherHint = document.getElementById('otherOutcomeHint');
+      const remLabel = document.getElementById('cModalRemarksLabel');
+      const remInput = document.getElementById('cModalRemarks');
+
       if (selected && selected.value === 'FOLLOW_UP') {
         container.classList.remove('hidden');
       } else {
         container.classList.add('hidden');
+      }
+
+      if (selected && selected.value === 'OTHER') {
+        if (otherHint) otherHint.classList.remove('hidden');
+        if (remLabel) remLabel.innerText = 'Mention Other Discussion / Notes *';
+        if (remInput) {
+          remInput.placeholder = 'Write what else was discussed with the student / parent...';
+          setTimeout(() => remInput.focus(), 40);
+        }
+      } else {
+        if (otherHint) otherHint.classList.add('hidden');
+        if (remLabel) remLabel.innerText = 'Discussion Remarks / Notes *';
+        if (remInput) remInput.placeholder = 'Enter discussion summary (e.g. Informed regarding exam date, fee promised by Monday, or any other detail...)';
       }
     }
 
@@ -5516,7 +5549,8 @@
         'ADMISSION_DONE': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-emerald-100 text-emerald-800">ADMISSION DONE</span>',
         'RINGING': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-sky-100 text-sky-800">RINGING</span>',
         'SWITCHED_OFF': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-200 text-slate-700">SWITCHED OFF</span>',
-        'NOT_INTERESTED': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-rose-100 text-rose-800">NOT REACHABLE</span>'
+        'NOT_INTERESTED': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-rose-100 text-rose-800">NOT REACHABLE</span>',
+        'OTHER': '<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-purple-100 text-purple-800">OTHER</span>'
       };
       return map[status] || `<span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-100 text-slate-700">${status}</span>`;
     }
@@ -6317,6 +6351,9 @@
       }
       if (callStatus === 'WRONG_NUMBER') {
         return '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 text-[10px] font-black border border-slate-300">Switched Off / Wrong</span>';
+      }
+      if (callStatus === 'OTHER') {
+        return '<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black border border-purple-200">Other</span>';
       }
       return '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">Not Called</span>';
     }
