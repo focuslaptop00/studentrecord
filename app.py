@@ -1936,73 +1936,55 @@ def manager_export_leads():
 @login_required
 def get_fees_students():
     search = request.args.get("search", "").strip()
-    status_filter = request.args.get("filter", "all").strip()
-    today_str = date.today().isoformat()
     is_real_manager = (
         (session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1)
         and session.get("username") != "savita"
     )
-    if not is_real_manager and status_filter == "paid":
-        status_filter = "all"
 
     with get_db() as conn:
         cursor = conn.cursor()
 
-        if status_filter == "paid":
-            query = """
-                SELECT l.id, l.name, l.father_name, l.phone, l.alt_phone, l.course, l.batch, l.learner_code, l.city,
-                       l.fee_pending_amount, l.fee_due_date, l.fee_remarks, l.is_fee_pending, l.last_call_at,
-                       u.name as last_caller_name,
-                       (SELECT remarks FROM call_logs WHERE lead_id = l.id ORDER BY id DESC LIMIT 1) as last_remarks,
-                       (SELECT COUNT(*) FROM call_logs WHERE lead_id = l.id) as total_calls
-                FROM leads l
-                LEFT JOIN users u ON l.last_caller_id = u.id
-                WHERE (l.record_type = 'admitted' OR l.record_type IS NULL) 
-                  AND (l.is_deleted = 0 OR l.is_deleted IS NULL)
-                  AND l.is_fee_pending = 0
-                  AND (l.fee_remarks LIKE '%Paid%' OR (l.fee_pending_amount != '' AND l.fee_pending_amount IS NOT NULL))
-            """
-        else:
-            query = """
-                SELECT l.id, l.name, l.father_name, l.phone, l.alt_phone, l.course, l.batch, l.learner_code, l.city,
-                       l.fee_pending_amount, l.fee_due_date, l.fee_remarks, l.is_fee_pending, l.last_call_at,
-                       u.name as last_caller_name,
-                       (SELECT remarks FROM call_logs WHERE lead_id = l.id ORDER BY id DESC LIMIT 1) as last_remarks,
-                       (SELECT COUNT(*) FROM call_logs WHERE lead_id = l.id) as total_calls
-                FROM leads l
-                LEFT JOIN users u ON l.last_caller_id = u.id
-                WHERE (l.record_type = 'admitted' OR l.record_type IS NULL) 
-                  AND (l.is_deleted = 0 OR l.is_deleted IS NULL)
-                  AND l.is_fee_pending = 1
-            """
+        query = """
+            SELECT l.id, l.name, l.father_name, l.phone, l.alt_phone, l.course, l.batch, l.learner_code, l.city,
+                   l.fee_pending_amount, l.fee_due_date, l.fee_remarks, l.is_fee_pending, l.last_call_at,
+                   u.name as last_caller_name,
+                   (SELECT remarks FROM call_logs WHERE lead_id = l.id ORDER BY id DESC LIMIT 1) as last_remarks,
+                   (SELECT COUNT(*) FROM call_logs WHERE lead_id = l.id) as total_calls
+            FROM leads l
+            LEFT JOIN users u ON l.last_caller_id = u.id
+            WHERE (l.record_type = 'admitted' OR l.record_type IS NULL)
+              AND (l.is_deleted = 0 OR l.is_deleted IS NULL)
+              AND l.is_fee_pending = 1
+        """
         params = []
-
-        if status_filter == "overdue":
-            query += " AND l.fee_due_date != '' AND l.fee_due_date < ?"
-            params.append(today_str)
-        elif status_filter == "today":
-            query += " AND l.fee_due_date = ?"
-            params.append(today_str)
-        elif status_filter == "upcoming":
-            query += " AND l.fee_due_date > ?"
-            params.append(today_str)
 
         if search:
             query += """ AND (
                 l.name LIKE ? OR l.father_name LIKE ? OR l.phone LIKE ? OR 
-                l.alt_phone LIKE ? OR l.course LIKE ? OR l.batch LIKE ? OR l.learner_code LIKE ?
+                l.alt_phone LIKE ? OR l.course LIKE ? OR l.batch LIKE ? OR l.city LIKE ? OR l.learner_code LIKE ?
             )"""
             w = f"%{search}%"
-            params.extend([w, w, w, w, w, w, w])
+            params.extend([w, w, w, w, w, w, w, w])
 
-        query += " ORDER BY CASE WHEN l.fee_due_date != '' THEN l.fee_due_date ELSE '9999-99-99' END ASC, l.name ASC"
+        query += " ORDER BY l.updated_at DESC, l.name ASC"
         cursor.execute(query, params)
-        rows = [dict(r) for r in cursor.fetchall()]
+        fetched = cursor.fetchall()
 
-        # Hide pending fee amounts from staff / non-manager users so only manager knows amounts
-        if not is_real_manager:
-            for r in rows:
-                r.pop("fee_pending_amount", None)
+        if is_real_manager:
+            rows = [dict(r) for r in fetched]
+        else:
+            # Staff gets ONLY Student Name, Phone No, Address, and Course — nothing else
+            rows = [
+                {
+                    "id": r["id"],
+                    "name": r["name"],
+                    "phone": r["phone"],
+                    "alt_phone": r["alt_phone"],
+                    "city": r["city"],
+                    "course": r["course"],
+                }
+                for r in fetched
+            ]
 
         cursor.execute("SELECT COUNT(*) as cnt FROM leads WHERE (record_type = 'admitted' OR record_type IS NULL) AND (is_deleted = 0 OR is_deleted IS NULL) AND is_fee_pending = 1")
         total_pending = cursor.fetchone()["cnt"]
@@ -2017,7 +1999,11 @@ def get_fees_students():
 @app.route("/api/fees/mark-pending", methods=["POST"])
 @login_required
 def mark_fee_pending():
-    if session.get("role") != "manager" and not session.get("is_super_admin"):
+    is_real_manager = (
+        (session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1)
+        and session.get("username") != "savita"
+    )
+    if not is_real_manager:
         return jsonify({"error": "Only Manager can assign or edit pending fees."}), 403
 
     data = request.json or {}
@@ -2042,18 +2028,22 @@ def mark_fee_pending():
         """, (amount, due_date, remarks, lead_id))
         conn.commit()
     bump_sync_version()
-    return jsonify({"success": True, "message": "Student marked for pending fees successfully!"})
+    return jsonify({"success": True, "message": "Student added to Fees Pending list!"})
 
 
 @app.route("/api/fees/mark-paid", methods=["POST"])
 @login_required
 def mark_fee_paid():
-    if session.get("role") != "manager" and not session.get("is_super_admin"):
-        return jsonify({"error": "Only Manager can mark fees as paid."}), 403
+    is_real_manager = (
+        (session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1)
+        and session.get("username") != "savita"
+    )
+    if not is_real_manager:
+        return jsonify({"error": "Only Manager can mark fees clear."}), 403
 
     data = request.json or {}
     lead_id = data.get("lead_id")
-    remarks = str(data.get("remarks", "Fee Paid")).strip()
+    remarks = str(data.get("remarks", "Fees Clear")).strip()
     user_id = session.get("user_id")
 
     if not lead_id:
@@ -2069,16 +2059,48 @@ def mark_fee_paid():
                 last_call_at = CURRENT_TIMESTAMP,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
-        """, (f"Paid: {remarks}", user_id, lead_id))
+        """, (f"Fees Clear: {remarks}", user_id, lead_id))
 
         cursor.execute("""
             INSERT INTO call_logs (lead_id, caller_id, status, remarks)
             VALUES (?, ?, 'COMPLETED', ?)
-        """, (lead_id, user_id, f"Fee Paid marked: {remarks}"))
+        """, (lead_id, user_id, f"Fees Clear marked: {remarks}"))
         conn.commit()
 
     bump_sync_version()
-    return jsonify({"success": True, "message": "Fee marked as paid successfully!"})
+    return jsonify({"success": True, "message": "Fees cleared successfully!"})
+
+
+@app.route("/api/fees/remove", methods=["POST"])
+@login_required
+def remove_fee_pending():
+    is_real_manager = (
+        (session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1)
+        and session.get("username") != "savita"
+    )
+    if not is_real_manager:
+        return jsonify({"error": "Only Manager can delete students from the Fees Pending list."}), 403
+
+    data = request.json or {}
+    lead_id = data.get("lead_id")
+    if not lead_id:
+        return jsonify({"error": "Lead ID is required"}), 400
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE leads
+            SET is_fee_pending = 0,
+                fee_pending_amount = '',
+                fee_due_date = '',
+                fee_remarks = '',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (lead_id,))
+        conn.commit()
+
+    bump_sync_version()
+    return jsonify({"success": True, "message": "Student removed from Fees Pending list!"})
 
 
 @app.route("/api/fees/log-call", methods=["POST"])
