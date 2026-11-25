@@ -1938,6 +1938,12 @@ def get_fees_students():
     search = request.args.get("search", "").strip()
     status_filter = request.args.get("filter", "all").strip()
     today_str = date.today().isoformat()
+    is_real_manager = (
+        (session.get("role") == "manager" or session.get("username") == "arsh" or session.get("user_id") == 1)
+        and session.get("username") != "savita"
+    )
+    if not is_real_manager and status_filter == "paid":
+        status_filter = "all"
 
     with get_db() as conn:
         cursor = conn.cursor()
@@ -1992,6 +1998,11 @@ def get_fees_students():
         query += " ORDER BY CASE WHEN l.fee_due_date != '' THEN l.fee_due_date ELSE '9999-99-99' END ASC, l.name ASC"
         cursor.execute(query, params)
         rows = [dict(r) for r in cursor.fetchall()]
+
+        # Hide pending fee amounts from staff / non-manager users so only manager knows amounts
+        if not is_real_manager:
+            for r in rows:
+                r.pop("fee_pending_amount", None)
 
         cursor.execute("SELECT COUNT(*) as cnt FROM leads WHERE (record_type = 'admitted' OR record_type IS NULL) AND (is_deleted = 0 OR is_deleted IS NULL) AND is_fee_pending = 1")
         total_pending = cursor.fetchone()["cnt"]
